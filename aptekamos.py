@@ -2,11 +2,11 @@ from gevent import monkey as curious_george
 curious_george.patch_all(thread=False, select=False)
 import requests
 from bs4 import BeautifulSoup as BS
-import proxy
 import csv_writer
 from history_writer import *
 import time
-from xml_writer import createXML, add_price
+import xml_writer
+# from xml_writer import createXML, add_price, get_meds_id
 import aiohttp
 import asyncio
 from requests.exceptions import ProxyError
@@ -359,7 +359,7 @@ class PriceUpdater(Thread):
         file_name = r'aptekamos_data/aptekamos_' + aptek_id + '.xml'
         date = time.strftime("%Y-%m-%d %H:%M:%S")
         if self.begin:
-            createXML(file_name, aptek_id, self.aptek['address'], date)
+            xml_writer.createXML(file_name, aptek_id, self.aptek['address'], date)
             create_save_file(r'aptekamos_data/parsed_med_{}'.format(aptek_id))
             csv_writer.create_csv_file(csv_dragid_file_name)
         parsing_meds = [med for med in meds if med not in load_file(r'aptekamos_data/parsed_med_{}'.format(aptek_id))]
@@ -379,13 +379,33 @@ class PriceUpdater(Thread):
                                 med_name = price_json['medName']
                             else:
                                 med_name = price_json['medName'] + f" № {price_json['pack']}"
+                                if not price_json['pack']:
+                                    med_name = price_json['medName']
+                            if not med_name:
+                                med_name = price_json['itemName']
                             data_meds = [{'title': med_name, 'id': drug_id}]
                             csv_writer.add_data_in_catalog(csv_dragid_file_name, data_meds)
-                        price = str(price_json['price'])
-                        add_price(file_name, drug_id, price)
-                        print(drug_id, price)
-                        print(file_name + ' upd')
+                        # print(price_json['itemId'])
+                        if drug_id == '0':
+                            drug_id = str(price_json['itemId'].split('\t')[0])
+                            if drug_id not in csv_writer.get_meds_ids(csv_dragid_file_name):
+                                if len(resps[i]['price']) == 1:
+                                    med_name = price_json['medName']
+                                else:
+                                    med_name = price_json['medName'] + f" № {price_json['pack']}"
+                                    if not price_json['pack']:
+                                        med_name = price_json['medName']
+                                if not med_name:
+                                    med_name = price_json['itemName']
+                                data_meds = [{'title': med_name, 'id': drug_id}]
+                                csv_writer.add_data_in_catalog(csv_dragid_file_name, data_meds)
+                        price = str(price_json['price']).replace('.', ',')
+                        if drug_id not in xml_writer.get_meds_id(file_name):
+                            xml_writer.add_price(file_name, drug_id, price)
+                            print(drug_id, price)
+                            print(file_name + ' upd')
                 save_file(r'aptekamos_data/parsed_med_{}'.format(aptek_id), med_lst[i])
+
 
     def run(self):
         self.update_prices()

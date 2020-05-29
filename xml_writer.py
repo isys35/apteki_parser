@@ -21,7 +21,7 @@ def add_price(filename, id, price):
     root = tree.getroot()
     item = etree.Element("ITEM")
     item.set('medid', id)
-    item.set('price', price)
+    item.set('medprice', price)
     root.append(item)
     etree.indent(root, space="\t")
     handle = etree.tostring(root, encoding='utf-8')
@@ -29,8 +29,18 @@ def add_price(filename, id, price):
         fh.write(handle)
 
 
+def get_meds_id(filename):
+    tree = etree.ElementTree(file=filename)
+    root = tree.getroot()
+    ids = []
+    for item in root.getchildren():
+        ids.append(item.values()[0])
+    return ids
+
+
 if __name__ == '__main__':
     createXML('assa.xml', '1', 'вфывфывыф', '3213-32')
     for i in range(10):
         add_price('assa.xml', '123123','321313')
+    get_meds_id('assa.xml')
 
