@@ -9,12 +9,12 @@ def add_data_in_catalog(file_name, data):
 
 
 def get_meds_names(file_name):
-    with open(file_name, "r", encoding='utf8', errors='ignore') as f_obj:
+    with open(file_name, "r", encoding='cp1251') as f_obj:
         return [row[1] for row in csv.reader(f_obj, delimiter=';')]
 
 
 def get_meds_ids(file_name):
-    with open(file_name, "r", encoding='utf8', errors='ignore') as f_obj:
+    with open(file_name, "r", encoding='cp1251') as f_obj:
         return [row[0] for row in csv.reader(f_obj, delimiter=';')]
 
 

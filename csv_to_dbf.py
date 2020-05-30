@@ -31,4 +31,4 @@ def csv_to_dbf(csv_file, dbf_file):
 
 
 if __name__ == '__main__':
-    csv_to_dbf('aptekamos_data/catalog_aptekamos.csv', 'aptekamos_data/catalog_aptekamos.dbf')
+    csv_to_dbf('aptekamos_data/catalog_aptekamos_dragid.csv', 'aptekamos_data/catalog_aptekamos_dragid.dbf')

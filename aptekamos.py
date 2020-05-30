@@ -384,6 +384,7 @@ class PriceUpdater(Thread):
                             if not med_name:
                                 med_name = price_json['itemName']
                             data_meds = [{'title': med_name, 'id': drug_id}]
+                            print(data_meds)
                             csv_writer.add_data_in_catalog(csv_dragid_file_name, data_meds)
                         # print(price_json['itemId'])
                         if drug_id == '0':
@@ -398,12 +399,14 @@ class PriceUpdater(Thread):
                                 if not med_name:
                                     med_name = price_json['itemName']
                                 data_meds = [{'title': med_name, 'id': drug_id}]
+                                print(data_meds)
                                 csv_writer.add_data_in_catalog(csv_dragid_file_name, data_meds)
                         price = str(price_json['price']).replace('.', ',')
                         if drug_id not in xml_writer.get_meds_id(file_name):
                             xml_writer.add_price(file_name, drug_id, price)
                             print(drug_id, price)
                             print(file_name + ' upd')
+                print(aptek_id, med_lst[i])
                 save_file(r'aptekamos_data/parsed_med_{}'.format(aptek_id), med_lst[i])
 
 
