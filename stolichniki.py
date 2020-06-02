@@ -4,7 +4,7 @@ from urllib.parse import quote
 from csv_writer import add_data_in_catalog, create_csv_file
 from history_writer import *
 import time
-from xml_writer import createXML, add_price
+import xml_writer
 
 KEYS_FOR_SEARCHING = 'qwertyuiopasdfghjklzxcvbnm1234567890йцукенгшщзхъфывапролджэячсмитьбю'
 
@@ -87,34 +87,34 @@ class Stolichniki:
                 meds = parsing_meds(resp)
                 if meds:
                     add_data_in_catalog(self.csv_file, meds)
-                save_file(r'stolichniki_data\parsed_updated_urls', aptek_key_url)
-            save_file(r'stolichniki_data\parsed_aptek_urls', aptek_url)
+                save_file(r'stolichniki_data/parsed_updated_urls', aptek_key_url)
+            save_file(r'stolichniki_data/parsed_aptek_urls', aptek_url)
         print('[INFO] Каталог обновлён')
 
     def update_price(self, begin=True):
         if begin:
             for aptek in self.initial_data:
                 id = aptek['url'].split('/')[-1]
-                file_name = r'stolichniki_data\stolichniki_' + id + '.xml'
+                file_name = r'stolichniki_data/stolichniki_' + id + '.xml'
                 date = time.strftime("%Y-%m-%d %H:%M:%S")
-                createXML(file_name, id, aptek['address'], date)
+                xml_writer.createXML(file_name, id, aptek['address'], date)
             self.create_save_files()
         aptek_urls = [url['url'] for url in self.initial_data
-                      if url['url'] not in load_file(r'stolichniki_data\parsed_aptek_urls')]
+                      if url['url'] not in load_file(r'stolichniki_data/parsed_aptek_urls')]
         for aptek_url in aptek_urls:
-            create_save_file(r'stolichniki_data\parsed_med')
+            create_save_file(r'stolichniki_data/parsed_med')
             aptek_id = aptek_url.split('/')[-1]
-            file_name = r'stolichniki_data\stolichniki_' + aptek_id + '.xml'
+            file_name = r'stolichniki_data/stolichniki_' + aptek_id + '.xml'
             updated_urls = [aptek_url + '?q=' + key for key in self.keys_for_searching if
-                            aptek_url + '?q=' + key not in load_file(r'stolichniki_data\parsed_updated_urls')]
+                            aptek_url + '?q=' + key not in load_file(r'stolichniki_data/parsed_updated_urls')]
             for aptek_key_url in updated_urls:
                 resp = self.request(aptek_key_url)
                 meds = parsing_meds(resp)
                 if meds:
                     for med in meds:
-                        add_price(file_name, med['id'], str(med['price']))
-                save_file(r'stolichniki_data\parsed_updated_urls', aptek_key_url)
-            save_file(r'stolichniki_data\parsed_aptek_urls', aptek_url)
+                        xml_writer.add_price(file_name, med['id'], str(med['price']))
+                save_file(r'stolichniki_data/parsed_updated_urls', aptek_key_url)
+            save_file(r'stolichniki_data/parsed_aptek_urls', aptek_url)
         print('[INFO] Цены обновлены')
 
     def request(self, url):
@@ -124,5 +124,5 @@ class Stolichniki:
 
 if __name__ == '__main__':
     parser = Stolichniki()
-    #parser.update_catalog(begin=False)
-    parser.update_price(begin=False)
+    parser.update_catalog(begin=True)
+    parser.update_price(begin=True)
