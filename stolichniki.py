@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup as BS
 from urllib.parse import quote
-from csv_writer import add_data_in_catalog, create_csv_file
+import csv_writer
 from history_writer import *
 import time
 import xml_writer
@@ -75,7 +75,7 @@ class Stolichniki:
 
     def update_catalog(self, begin=True):
         if begin:
-            create_csv_file(self.csv_file)
+            csv_writer.create_csv_file(self.csv_file)
             self.create_save_files()
         aptek_urls = [url['url'] for url in self.initial_data
                         if url['url'] not in load_file(r'stolichniki_data/parsed_aptek_urls')]
@@ -86,7 +86,7 @@ class Stolichniki:
                 resp = self.request(aptek_key_url)
                 meds = parsing_meds(resp)
                 if meds:
-                    add_data_in_catalog(self.csv_file, meds)
+                    csv_writer.add_data_in_catalog(self.csv_file, meds)
                 save_file(r'stolichniki_data/parsed_updated_urls', aptek_key_url)
             save_file(r'stolichniki_data/parsed_aptek_urls', aptek_url)
         print('[INFO] Каталог обновлён')
