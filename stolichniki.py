@@ -10,7 +10,7 @@ KEYS_FOR_SEARCHING = 'qwertyuiopasdfghjklzxcvbnm1234567890йцукенгшщзх
 
 
 def get_initial_data():
-    with open('stolichniki_data/initial_data.txt', 'r', encoding='utf8') as txt:
+    with open('stolichniki_data/initial_data.txt', 'r', encoding='cp1251') as txt:
         rows = txt.read().split('\n')
         apteks = []
         for row in rows:
