@@ -10,7 +10,7 @@ KEYS_FOR_SEARCHING = 'qwertyuiopasdfghjklzxcvbnm1234567890йцукенгшщзх
 
 
 def get_initial_data():
-    with open('stolichniki_data/initial_data.txt', 'r') as txt:
+    with open('stolichniki_data/initial_data.txt', 'r', encoding='utf8') as txt:
         rows = txt.read().split('\n')
         apteks = []
         for row in rows:
@@ -35,7 +35,7 @@ def parsing_meds(resp):
         if med_soup.select_one('.store-info'):
             title = med_soup.select_one('.store-info').select_one('a').text
             id = med_soup.select_one('.store-info').select_one('a')['href'].split('/')[-1]
-            if id not in load_file(r'stolichniki_data\parsed_med'):
+            if id not in load_file(r'stolichniki_data/parsed_med'):
                 print(title, id)
                 product_prices = med_soup.select_one('.product-price').select('.price-block')
                 product_prices_num = []
@@ -49,7 +49,7 @@ def parsing_meds(resp):
                     product_prices_num.append(float(price))
                 price_aptek_med = product_prices_num[-1]
                 meds.append({'title': title, 'id': id, 'price': price_aptek_med})
-                save_file(r'stolichniki_data\parsed_med', id)
+                save_file(r'stolichniki_data/parsed_med', id)
     return meds
 
 
@@ -66,22 +66,22 @@ class Stolichniki:
     def __init__(self):
         self.initial_data = get_initial_data()
         self.keys_for_searching = keys_for_seaching()
-        self.csv_file = r'stolichniki_data\stolichniki_catalog.csv'
+        self.csv_file = r'stolichniki_data/stolichniki_catalog.csv'
 
     def create_save_files(self):
-        create_save_file(r'stolichniki_data\parsed_updated_urls')
-        create_save_file(r'stolichniki_data\parsed_aptek_urls')
-        create_save_file(r'stolichniki_data\parsed_med')
+        create_save_file(r'stolichniki_data/parsed_updated_urls')
+        create_save_file(r'stolichniki_data/parsed_aptek_urls')
+        create_save_file(r'stolichniki_data/parsed_med')
 
     def update_catalog(self, begin=True):
         if begin:
             create_csv_file(self.csv_file)
             self.create_save_files()
         aptek_urls = [url['url'] for url in self.initial_data
-                        if url['url'] not in load_file(r'stolichniki_data\parsed_aptek_urls')]
+                        if url['url'] not in load_file(r'stolichniki_data/parsed_aptek_urls')]
         for aptek_url in aptek_urls:
             updated_urls = [aptek_url + '?q=' + key for key in self.keys_for_searching if
-                            aptek_url + '?q=' + key not in load_file(r'stolichniki_data\parsed_updated_urls')]
+                            aptek_url + '?q=' + key not in load_file(r'stolichniki_data/parsed_updated_urls')]
             for aptek_key_url in updated_urls:
                 resp = self.request(aptek_key_url)
                 meds = parsing_meds(resp)
