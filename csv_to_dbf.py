@@ -19,7 +19,7 @@ def add_data_in_dbf(file_name, data):
 
 
 def csv_to_dbf(csv_file, dbf_file):
-    with io.open(csv_file, "r") as file:
+    with io.open(csv_file, "r", encoding='utf8') as file:
         txt = file.read()
     rows = txt.split('\n')
     data = []
@@ -31,4 +31,4 @@ def csv_to_dbf(csv_file, dbf_file):
 
 
 if __name__ == '__main__':
-    csv_to_dbf('aptekamos_data/catalog_aptekamos_dragid.csv', 'aptekamos_data/catalog_aptekamos_dragid.dbf')
+    csv_to_dbf('stolichniki_data\stolichniki_catalog.csv', 'stolichniki_data\stolichniki_catalog.dbf')
