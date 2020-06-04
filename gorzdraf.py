@@ -71,7 +71,7 @@ class GorZdrafParser(Parser):
 
 if __name__ == '__main__':
     parser = GorZdrafParser()
-    parser.update_prices()
+    parser.update_catalog()
 
 
 
