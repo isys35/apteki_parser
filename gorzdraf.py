@@ -72,7 +72,7 @@ class GorZdrafParser(Parser):
         return meds_urls
 
     def get_apteks(self):
-        print('[INFO] Получение аптек...')
+        print('     [INFO] Получение аптек...')
         resp = self.request.get(self.MAIN_PAGE + '/apteki/list/')
         max_page = self.get_max_page(resp.text)
         urls = [self.MAIN_PAGE + '/apteki/list/']
@@ -88,7 +88,7 @@ class GorZdrafParser(Parser):
                     id = row.select_one('.b-store-favorite__btn.js-favorites-store.js-text-hint')['data-store']
                     adress =row.select_one('.c-pharm__descr').text
                     apteks.append({'id': id, 'address': adress})
-        print('[INFO] Аптеки получены аптек...')
+        print('     [INFO] Аптеки получены')
         return apteks
 
     def get_max_page(self, resp_text):
