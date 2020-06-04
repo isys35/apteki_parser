@@ -2,8 +2,9 @@ import csv
 
 
 def add_data_in_catalog(file_name, data):
+    meds_ids = get_meds_ids(file_name)
     with open(file_name, "a", newline="") as file:
-        data = [[el['id'], el['title']] for el in data]
+        data = [[el['id'], el['title']] for el in data if el['id'] not in meds_ids]
         writer = csv.writer(file, delimiter = ';')
         writer.writerows(data)
 
