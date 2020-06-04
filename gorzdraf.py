@@ -12,6 +12,7 @@ class GorZdrafParser(Parser):
         self.csv_catalog = f'{self.folder_data}/catalog_gorzdraf.csv'
 
     def update_catalog(self):
+        print('[INFO] Обновление каталога...')
         csv_writer.create_csv_file(self.csv_catalog)
         resp = self.request.get(self.MAIN_PAGE)
         soup = BeautifulSoup(resp.text, 'lxml')
@@ -28,6 +29,7 @@ class GorZdrafParser(Parser):
         for category_with_page in url_categories_with_pages:
             meds = self.get_meds(category_with_page)
             csv_writer.add_data_in_catalog(self.csv_catalog, meds)
+        print('[INFO] Обновление каталога завершено')
 
     def get_meds(self, urls):
         resps = self.requests.get(urls)
