@@ -31,6 +31,23 @@ class GorZdrafParser(Parser):
             csv_writer.add_data_in_catalog(self.csv_catalog, meds)
         print('[INFO] Обновление каталога завершено')
 
+    def update_prices(self):
+        print('[INFO] Обновление цен...')
+        apteks = self.get_apteks()
+
+    def get_apteks(self):
+        print('[INFO] Получение аптек...')
+        resp = self.request.get(self.MAIN_PAGE + '/apteki/list/')
+        max_page = self.get_max_page(resp.text)
+        urls = [self.MAIN_PAGE + '/apteki/list/']
+        extend_list = [self.MAIN_PAGE + f'/apteki/list/?page={page}' for page in range(1, max_page)]
+        urls.extend(extend_list)
+        print(urls)
+
+    def get_max_page(self, resp_text):
+        soup = BeautifulSoup(resp_text, 'lxml')
+        return int(soup.select('.b-pagination__item')[-2].text)
+
     def get_meds(self, urls):
         resps = self.requests.get(urls)
         meds = []
@@ -48,14 +65,13 @@ class GorZdrafParser(Parser):
         resps = self.requests.get(urls)
         max_pages = []
         for resp in resps:
-            soup = BeautifulSoup(resp, 'lxml')
-            max_pages.append(int(soup.select('.b-pagination__item')[-2].text))
+            max_pages.append(self.get_max_page(resp))
         return max_pages
 
 
 if __name__ == '__main__':
     parser = GorZdrafParser()
-    parser.update_catalog()
+    parser.update_prices()
 
 
 
