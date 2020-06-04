@@ -22,7 +22,7 @@ class GorZdrafParser(Parser):
         url_categories_with_pages = []
         for category_index in range(count_categories):
             category_with_page = [url_categories[category_index]]
-            for page in range(1, max_pages[category_index]+1):
+            for page in range(2, max_pages[category_index]+1):
                 url_page = url_categories[category_index] + f'?q=%3AavailableInStoresOrStock%3Atrue&page={page}'
                 category_with_page.append(url_page)
             url_categories_with_pages.append(category_with_page)
