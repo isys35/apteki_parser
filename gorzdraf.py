@@ -28,7 +28,6 @@ class GorZdrafParser(Parser):
             url_categories_with_pages.append(category_with_page)
         for category_with_page in url_categories_with_pages:
             meds = self.get_meds(category_with_page)
-            meds = [med for med in meds if med['id'] not in csv_writer.get_meds_ids(self.csv_catalog)]
             csv_writer.add_data_in_catalog(self.csv_catalog, meds)
         print('[INFO] Обновление каталога завершено')
 
