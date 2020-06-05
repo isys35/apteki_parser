@@ -52,6 +52,7 @@ class GorZdrafParser(Parser):
 
     def get_meds_full_info(self, meds):
         splited_meds = self.split_list(meds, 100)
+        meds = []
         for splited_med in splited_meds:
             count_meds = len(splited_med)
             med_urls = [med['url'] for med in splited_med]
@@ -59,7 +60,12 @@ class GorZdrafParser(Parser):
             for med_index in range(count_meds):
                 soup = BeautifulSoup(resps[med_index], 'lxml')
                 price = soup.find('meta', itemprop="price")
+                price = float(price['content'])
+                url_aptek = f"https://gorzdrav.org/stockdb/ajax/product/{splited_med[med_index]['med_id']}/stores/all/?sortName=recommend&sortType=ASC"
+                resp_apteks = self.request.get(url_aptek)
+                apteks = [aptek['name'] for aptek in resp_apteks.json()['data']]
                 print(price)
+                print(apteks)
                 sys.exit()
 
     def get_meds_urls(self, urls):
