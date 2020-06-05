@@ -59,6 +59,7 @@ class GorZdrafParser(Parser):
             soup = BeautifulSoup(resps[med_index], 'lxml')
             price = soup.find('meta', itemprop="price")
             print(price)
+            sys.exit()
 
     def get_meds_urls(self, urls):
         resps = self.requests.get(urls)
