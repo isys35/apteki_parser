@@ -5,6 +5,7 @@ import time
 import xml_writer
 import sys
 
+
 class GorZdrafParser(Parser):
     MAIN_PAGE = 'https://gorzdrav.org'
 
@@ -48,7 +49,13 @@ class GorZdrafParser(Parser):
         url_categories_with_pages = self.get_url_categories_with_pages()
         for category_with_page in url_categories_with_pages:
             meds_urls = self.get_meds_urls(category_with_page)
-            self.get_meds_full_info(meds_urls)
+            meds_with_full_info = self.get_meds_full_info(meds_urls)
+            for med in meds_with_full_info:
+                for aptek in med['apteks']:
+                    file_name = f"{self.folder_data}/gorzdraf_{aptek}.xml"
+                    xml_writer.add_price(file_name, med['med_id'], med['price'])
+                    print(file_name + ' upd')
+        print('[INFO] Обновление цен завершено')
 
     def get_meds_full_info(self, meds):
         splited_meds = self.split_list(meds, 100)
@@ -64,9 +71,11 @@ class GorZdrafParser(Parser):
                 url_aptek = f"https://gorzdrav.org/stockdb/ajax/product/{splited_med[med_index]['med_id']}/stores/all/?sortName=recommend&sortType=ASC"
                 resp_apteks = self.request.get(url_aptek)
                 apteks = [aptek['name'] for aptek in resp_apteks.json()['data']]
-                print(price)
-                print(apteks)
-                sys.exit()
+                meds.append({'med_id': splited_med[med_index]['med_id'],
+                             'url': splited_med[med_index]['url'],
+                             'price': str(price),
+                             'apteks': apteks})
+        return meds
 
     def get_meds_urls(self, urls):
         resps = self.requests.get(urls)
