@@ -51,16 +51,16 @@ class GorZdrafParser(Parser):
             self.get_meds_full_info(meds_urls)
 
     def get_meds_full_info(self, meds):
-        count_meds = len(meds)
-        med_urls = [med['url'] for med in meds]
-        print(len(med_urls))
-        resps = self.requests.get(med_urls)
-        print(len(resps))
-        for med_index in range(count_meds):
-            soup = BeautifulSoup(resps[med_index], 'lxml')
-            price = soup.find('meta', itemprop="price")
-            print(price)
-            sys.exit()
+        splited_meds = self.split_list(meds, 100)
+        for splited_med in splited_meds:
+            count_meds = len(splited_med)
+            med_urls = [med['url'] for med in splited_med]
+            resps = self.requests.get(med_urls)
+            for med_index in range(count_meds):
+                soup = BeautifulSoup(resps[med_index], 'lxml')
+                price = soup.find('meta', itemprop="price")
+                print(price)
+                sys.exit()
 
     def get_meds_urls(self, urls):
         resps = self.requests.get(urls)

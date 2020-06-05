@@ -22,6 +22,10 @@ class Parser:
         with open(f"{image_name}", 'wb') as out:
             out.write(resp.content)
 
+    @staticmethod
+    def split_list(lst, size_lst):
+        return [lst[i:i+size_lst] for i in range(0, len(lst), size_lst)]
+
 
 class Request:
     def __init__(self):
