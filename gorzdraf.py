@@ -53,7 +53,7 @@ class GorZdrafParser(Parser):
     def get_meds_full_info(self, meds):
         count_meds = len(meds)
         med_urls = [med['url'] for med in meds]
-        print(med_urls)
+        print(len(med_urls))
         resps = self.requests.get(med_urls)
         for med_index in range(count_meds):
             soup = BeautifulSoup(resps[med_index], 'lxml')
