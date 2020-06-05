@@ -4,6 +4,7 @@ import csv_writer
 import time
 import xml_writer
 import sys
+import json
 
 
 class GorZdrafParser(Parser):
@@ -64,17 +65,18 @@ class GorZdrafParser(Parser):
             count_meds = len(splited_med)
             med_urls = [med['url'] for med in splited_med]
             resps = self.requests.get(med_urls)
+            aptek_urls = [f"https://gorzdrav.org/stockdb/ajax/product/{med['med_id']}/stores/all/?sortName=recommend&sortType=ASC" for med in splited_med]
+            resps_apteks = self.requests.get(aptek_urls)
             for med_index in range(count_meds):
                 soup = BeautifulSoup(resps[med_index], 'lxml')
                 price = soup.find('meta', itemprop="price")
                 price = float(price['content'])
-                url_aptek = f"https://gorzdrav.org/stockdb/ajax/product/{splited_med[med_index]['med_id']}/stores/all/?sortName=recommend&sortType=ASC"
-                resp_apteks = self.request.get(url_aptek)
-                apteks = [aptek['name'] for aptek in resp_apteks.json()['data']]
+                apteks = [aptek['name'] for aptek in json.loads(resps_apteks[med_index])['data']]
                 meds.append({'med_id': splited_med[med_index]['med_id'],
                              'url': splited_med[med_index]['url'],
                              'price': str(price),
                              'apteks': apteks})
+                print(splited_med[med_index]['url'])
         return meds
 
     def get_meds_urls(self, urls):
