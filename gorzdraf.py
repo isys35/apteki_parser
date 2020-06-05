@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import csv_writer
 import time
 import xml_writer
+import sys
 
 class GorZdrafParser(Parser):
     MAIN_PAGE = 'https://gorzdrav.org'
@@ -47,12 +48,12 @@ class GorZdrafParser(Parser):
         url_categories_with_pages = self.get_url_categories_with_pages()
         for category_with_page in url_categories_with_pages:
             meds_urls = self.get_meds_urls(category_with_page)
-            print(meds_urls)
             self.get_meds_full_info(meds_urls)
 
     def get_meds_full_info(self, meds):
         count_meds = len(meds)
         med_urls = [med['url'] for med in meds]
+        print(med_urls)
         resps = self.requests.get(med_urls)
         for med_index in range(count_meds):
             soup = BeautifulSoup(resps[med_index], 'lxml')
