@@ -55,14 +55,28 @@ def parsing_meds(resp):
 
 
 class Stolichniki:
-    HEADERS = {'Host': 'stolichki.ru',
-               'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0',
-               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-               'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
-               'Accept-Encoding': 'gzip, deflate, br',
-               'Connection': 'keep-alive',
-               'Upgrade-Insecure-Requests': '1',
-               'TE': 'Trailers'}
+    HEADERS = {
+        'Host': 'stolichki.ru',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'TE': 'Trailers'
+    }
+    HEADERS_JSON = {
+        'Host': 'stolichki.ru',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0',
+        'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'TE': 'Trailers',
+        'Referer': 'https://stolichki.ru/apteki',
+        'Accept': 'application/json, text/plain, */*',
+        'X-Requested-With': 'XMLHttpRequest'
+    }
 
     def __init__(self):
         self.initial_data = self.get_initial_data()
@@ -73,12 +87,8 @@ class Stolichniki:
         resp = requests.get('https://stolichki.ru/apteki', headers=self.HEADERS)
         soup = BS(resp.text, 'lxml')
         csrf_token = soup.find('meta', attrs={'name': "csrf-token"})['content']
-        headers = self.HEADERS
-        headers['Referer'] = 'https://stolichki.ru/apteki'
-        headers['X-CSRF-TOKEN'] = csrf_token
-        headers['Accept'] = 'application/json, text/plain, */*'
-        headers['X-Requested-With'] = 'XMLHttpRequest'
-        resp = requests.get('https://stolichki.ru/stores/all?cityId=1', headers=headers)
+        self.HEADERS_JSON['X-CSRF-TOKEN'] = csrf_token
+        resp = requests.get('https://stolichki.ru/stores/all?cityId=1', headers=self.HEADERS_JSON)
         json_resp = resp.json()
         stores = json_resp['stores']
         apteks = []
@@ -140,6 +150,7 @@ class Stolichniki:
         print('[INFO] Цены обновлены')
 
     def request(self, url):
+        print(self.HEADERS)
         r = requests.get(url, headers=self.HEADERS)
         return r.text
 
