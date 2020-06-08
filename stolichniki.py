@@ -5,6 +5,7 @@ import csv_writer
 from history_writer import *
 import time
 import xml_writer
+import sys
 
 KEYS_FOR_SEARCHING = 'qwertyuiopasdfghjklzxcvbnm1234567890йцукенгшщзхъфывапролджэячсмитьбю'
 
@@ -64,9 +65,26 @@ class Stolichniki:
                'TE': 'Trailers'}
 
     def __init__(self):
-        self.initial_data = get_initial_data()
+        self.initial_data = self.get_initial_data()
         self.keys_for_searching = keys_for_seaching()
         self.csv_file = r'stolichniki_data/stolichniki_catalog.csv'
+
+    def get_initial_data(self):
+        resp = requests.get('https://stolichki.ru/apteki', headers=self.HEADERS)
+        soup = BS(resp.text, 'lxml')
+        csrf_token = soup.find('meta', attrs={'name': "csrf-token"})['content']
+        headers = self.HEADERS
+        headers['Referer'] = 'https://stolichki.ru/apteki'
+        headers['X-CSRF-TOKEN'] = csrf_token
+        headers['Accept'] = 'application/json, text/plain, */*'
+        headers['X-Requested-With'] = 'XMLHttpRequest'
+        resp = requests.get('https://stolichki.ru/stores/all?cityId=1', headers=headers)
+        json_resp = resp.json()
+        stores = json_resp['stores']
+        apteks = []
+        for store in stores:
+            apteks.append({'url': f"https://stolichki.ru/apteki/{store['id']}", 'address':store['full_address']})
+        return apteks
 
     def create_save_files(self):
         create_save_file(r'stolichniki_data/parsed_updated_urls')
@@ -80,9 +98,11 @@ class Stolichniki:
         aptek_urls = [url['url'] for url in self.initial_data
                         if url['url'] not in load_file(r'stolichniki_data/parsed_aptek_urls')]
         for aptek_url in aptek_urls:
+            print(aptek_url)
             updated_urls = [aptek_url + '?q=' + key for key in self.keys_for_searching if
                             aptek_url + '?q=' + key not in load_file(r'stolichniki_data/parsed_updated_urls')]
             for aptek_key_url in updated_urls:
+                print(aptek_key_url)
                 resp = self.request(aptek_key_url)
                 meds = parsing_meds(resp)
                 if meds:
@@ -102,12 +122,14 @@ class Stolichniki:
         aptek_urls = [url['url'] for url in self.initial_data
                       if url['url'] not in load_file(r'stolichniki_data/parsed_aptek_urls')]
         for aptek_url in aptek_urls:
+            print(aptek_url)
             create_save_file(r'stolichniki_data/parsed_med')
             aptek_id = aptek_url.split('/')[-1]
             file_name = r'stolichniki_data/stolichniki_' + aptek_id + '.xml'
             updated_urls = [aptek_url + '?q=' + key for key in self.keys_for_searching if
                             aptek_url + '?q=' + key not in load_file(r'stolichniki_data/parsed_updated_urls')]
             for aptek_key_url in updated_urls:
+                print(aptek_key_url)
                 resp = self.request(aptek_key_url)
                 meds = parsing_meds(resp)
                 if meds:
