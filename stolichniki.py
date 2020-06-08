@@ -150,7 +150,6 @@ class Stolichniki:
         print('[INFO] Цены обновлены')
 
     def request(self, url):
-        print(self.HEADERS)
         r = requests.get(url, headers=self.HEADERS)
         return r.text
 
