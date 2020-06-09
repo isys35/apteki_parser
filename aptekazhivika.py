@@ -53,7 +53,7 @@ class ZhivikaParser(Parser):
                 resp_json = resp.json()
                 for med in resp_json['data']['products']['items']:
                     sku = med['sku']
-                    med_id = med['id']
+                    med_id = str(med['id'])
                     price = med['price']['regularPrice']['amount']['value']
                     query_apteks = "\n query getPvzProducts($sku: String, $day: Int){\n pvzProducts(productSku: $sku, day: $day, pageSize: 1000){\n items{\n address,\n latitude,\n longitude,\n name,\n phone,\n schedule,\n quantity,\n group_name,\n schedule_prepared,\n station,\n entity_id,\n },\n total_count\n }\n }\n "
                     variables_apteks = {'day': 0, 'sku': sku}
@@ -61,7 +61,7 @@ class ZhivikaParser(Parser):
                     resp_apteks = self.request.post(self.MAIN_PAGE + 'graphql', json_data=json_post_data_apteks)
                     resp_apteks_json = resp_apteks.json()
                     for aptek in resp_apteks_json['data']['pvzProducts']['items']:
-                        aptek_id = aptek['entity_id']
+                        aptek_id = str(aptek['entity_id'])
                         address = aptek['address']
                         print(address, med_id)
                         xml_file_name = f"{self.name}_{aptek_id}.xml"
