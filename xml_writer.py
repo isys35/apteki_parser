@@ -17,6 +17,9 @@ def createXML(filename, id, name, date):
 
 
 def add_price(filename, id, price):
+    ids = get_meds_id(filename)
+    if id in ids:
+        return
     tree = etree.ElementTree(file=filename)
     root = tree.getroot()
     item = etree.Element("ITEM")

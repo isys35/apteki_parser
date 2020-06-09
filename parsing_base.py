@@ -51,6 +51,8 @@ class Request:
             response = requests.post(url, headers=headers, json=json_data)
         if response.status_code == 200:
             return response
+        if response.status_code == 500:
+            return response
         else:
             print(response)
             sys.exit()

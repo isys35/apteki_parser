@@ -50,6 +50,9 @@ class ZhivikaParser(Parser):
                 variables = {"pageSize": self.PAGE_SIZE, "currentPage": current_page}
                 json_post_data = {"query": query, "variables": variables}
                 resp = self.request.post(self.MAIN_PAGE + 'graphql', json_data=json_post_data)
+                if resp.status_code == 500:
+                    print(resp)
+                    break
                 resp_json = resp.json()
                 for med in resp_json['data']['products']['items']:
                     sku = med['sku']
@@ -59,6 +62,9 @@ class ZhivikaParser(Parser):
                     variables_apteks = {'day': 0, 'sku': sku}
                     json_post_data_apteks = {"query": query_apteks, "variables": variables_apteks}
                     resp_apteks = self.request.post(self.MAIN_PAGE + 'graphql', json_data=json_post_data_apteks)
+                    if resp_apteks.status_code == 500:
+                        print(resp_apteks)
+                        continue
                     resp_apteks_json = resp_apteks.json()
                     for aptek in resp_apteks_json['data']['pvzProducts']['items']:
                         aptek_id = str(aptek['entity_id'])
