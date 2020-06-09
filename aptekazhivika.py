@@ -1,6 +1,8 @@
 from parsing_base import Parser
 import csv_writer
-
+import os
+import xml_writer
+import time
 
 class ZhivikaParser(Parser):
     MAIN_PAGE = 'https://www.aptekazhivika.ru/'
@@ -10,8 +12,9 @@ class ZhivikaParser(Parser):
 
     def __init__(self):
         super().__init__()
-        self.folder_data = 'zhivika_data'
-        self.csv_file = f'{self.folder_data}/catalog_zhivika.csv'
+        self.name = 'zhivika'
+        self.folder_data = f'{self.name}_data'
+        self.csv_file = f'{self.folder_data}/catalog_{self.name}.csv'
 
     def update_catalog(self):
         print('[INFO] Обновление каталога...')
@@ -37,7 +40,48 @@ class ZhivikaParser(Parser):
             csv_writer.add_data_in_catalog(self.csv_file, meds)
         print('[INFO] Каталог обновлён.')
 
+    def update_prices(self):
+        print('[INFO] Обновление цен...')
+        for id_category in self.IDS_CATEGORY:
+            query = self.QUERY % id_category
+            current_page = 1
+            max_page = None
+            while True:
+                variables = {"pageSize": self.PAGE_SIZE, "currentPage": current_page}
+                json_post_data = {"query": query, "variables": variables}
+                resp = self.request.post(self.MAIN_PAGE + 'graphql', json_data=json_post_data)
+                resp_json = resp.json()
+                for med in resp_json['data']['products']['items']:
+                    sku = med['sku']
+                    med_id = med['id']
+                    price = med['price']['regularPrice']['amount']['value']
+                    query_apteks = "\n query getPvzProducts($sku: String, $day: Int){\n pvzProducts(productSku: $sku, day: $day, pageSize: 1000){\n items{\n address,\n latitude,\n longitude,\n name,\n phone,\n schedule,\n quantity,\n group_name,\n schedule_prepared,\n station,\n entity_id,\n },\n total_count\n }\n }\n "
+                    variables_apteks = {'day': 0, 'sku': sku}
+                    json_post_data_apteks = {"query": query_apteks, "variables": variables_apteks}
+                    resp_apteks = self.request.post(self.MAIN_PAGE + 'graphql', json_data=json_post_data_apteks)
+                    resp_apteks_json = resp_apteks.json()
+                    for aptek in resp_apteks_json['data']['pvzProducts']['items']:
+                        aptek_id = aptek['entity_id']
+                        address = aptek['address']
+                        print(address, med_id)
+                        xml_file_name = f"{self.name}_{aptek_id}.xml"
+                        if xml_file_name not in os.listdir(self.folder_data):
+                            date = time.strftime("%Y-%m-%d %H:%M:%S")
+                            xml_writer.createXML(f"{self.folder_data}/{xml_file_name}", aptek_id, address, date)
+                        xml_writer.add_price(f"{self.folder_data}/{xml_file_name}", med_id, price)
+                if not max_page:
+                    max_page = 1 + resp_json['data']['products']['total_count']//self.PAGE_SIZE
+                current_page += 1
+                if current_page > max_page:
+                    break
+        print('[INFO] Цены обновлены')
+
+
+
+
+
 
 if __name__ == '__main__':
     parser = ZhivikaParser()
-    parser.update_catalog()
+    # parser.update_catalog()
+    parser.update_prices()
