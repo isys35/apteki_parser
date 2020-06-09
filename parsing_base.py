@@ -44,6 +44,18 @@ class Request:
             print(response)
             sys.exit()
 
+    def post(self, url, json_data, headers=None):
+        if headers is None:
+            response = requests.post(url, headers=self.headers, json=json_data)
+        else:
+            response = requests.post(url, headers=headers, json=json_data)
+        if response.status_code == 200:
+            return response
+        else:
+            print(response)
+            sys.exit()
+
+
 
 class Requests(Request):
     def __init__(self):
