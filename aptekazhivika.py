@@ -42,6 +42,7 @@ class ZhivikaParser(Parser):
 
     def update_prices(self):
         print('[INFO] Обновление цен...')
+        xml_writer.remove_xml(self.folder_data)
         for id_category in self.IDS_CATEGORY:
             query = self.QUERY % id_category
             current_page = 1

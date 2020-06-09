@@ -1,6 +1,4 @@
 import os
-from bs4 import BeautifulSoup as BS
-import re
 from lxml import etree
 
 
@@ -14,6 +12,12 @@ def createXML(filename, id, name, date):
     handle = etree.tostring(tree, pretty_print=True, encoding='utf-8', xml_declaration=False)
     with open(filename, "wb") as fh:
         fh.write(handle)
+
+
+def remove_xml(path):
+    for el in os.listdir(path):
+        if '.xml' == el[-4:]:
+            os.remove(f'{path}/{el}')
 
 
 def add_price(filename, id, price):
