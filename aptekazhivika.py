@@ -54,7 +54,7 @@ class ZhivikaParser(Parser):
                 for med in resp_json['data']['products']['items']:
                     sku = med['sku']
                     med_id = str(med['id'])
-                    price = med['price']['regularPrice']['amount']['value']
+                    price = str(med['price']['regularPrice']['amount']['value'])
                     query_apteks = "\n query getPvzProducts($sku: String, $day: Int){\n pvzProducts(productSku: $sku, day: $day, pageSize: 1000){\n items{\n address,\n latitude,\n longitude,\n name,\n phone,\n schedule,\n quantity,\n group_name,\n schedule_prepared,\n station,\n entity_id,\n },\n total_count\n }\n }\n "
                     variables_apteks = {'day': 0, 'sku': sku}
                     json_post_data_apteks = {"query": query_apteks, "variables": variables_apteks}
