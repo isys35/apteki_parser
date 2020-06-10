@@ -117,6 +117,7 @@ class ZhivikaParser(Parser):
                 for med in meds:
                     for aptek in med['apteks']:
                         xml_file_name = f"{self.name}_{aptek['aptek_id']}.xml"
+                        print(xml_file_name)
                         if xml_file_name not in os.listdir(self.folder_data):
                             date = time.strftime("%Y-%m-%d %H:%M:%S")
                             xml_writer.createXML(f"{self.folder_data}/{xml_file_name}", aptek['aptek_id'], aptek['address'], date)
