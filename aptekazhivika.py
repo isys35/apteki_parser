@@ -73,6 +73,13 @@ class ZhivikaParser(Parser):
             data_all_pages.append(json.loads(resp))
         return data_all_pages
 
+    def get_meds(self, data_page):
+        count_meds = len(data_page['data']['products']['items'])
+        for med in range(count_meds):
+            sku = med['sku']
+            med_id = str(med['id'])
+            price = str(med['price']['regularPrice']['amount']['value'])
+
     def update_prices(self):
         print('[INFO] Обновление цен...')
         xml_writer.remove_xml(self.folder_data)
@@ -80,8 +87,8 @@ class ZhivikaParser(Parser):
         count_categories = len(self.IDS_CATEGORY)
         for category_index in range(count_categories):
             all_pages_data = self.get_all_pages_data(self.IDS_CATEGORY[category_index], max_pages[category_index])
-            print(len(all_pages_data))
-            sys.exit()
+            for data_page in all_pages_data:
+                meds = self.get_meds(data_page)
         # for id_category in self.IDS_CATEGORY:
         #     query = self.QUERY % id_category
         #     current_page = 1
