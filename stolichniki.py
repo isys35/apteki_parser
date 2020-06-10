@@ -93,7 +93,7 @@ class Stolichniki:
         stores = json_resp['stores']
         apteks = []
         for store in stores:
-            apteks.append({'url': f"https://stolichki.ru/apteki/{store['id']}", 'address':store['full_address']})
+            apteks.append({'url': f"https://stolichki.ru/apteki/{store['id']}", 'address': store['full_address']})
         return apteks
 
     def create_save_files(self):
@@ -127,7 +127,7 @@ class Stolichniki:
                 id = aptek['url'].split('/')[-1]
                 file_name = r'stolichniki_data/stolichniki_' + id + '.xml'
                 date = time.strftime("%Y-%m-%d %H:%M:%S")
-                print(aptek['address'])
+                print(aptek)
                 xml_writer.createXML(file_name, id, aptek['address'], date)
             self.create_save_files()
         aptek_urls = [url['url'] for url in self.initial_data
@@ -157,5 +157,5 @@ class Stolichniki:
 
 if __name__ == '__main__':
     parser = Stolichniki()
-    parser.update_catalog(begin=False)
+    # parser.update_catalog(begin=False)
     parser.update_price(begin=True)
