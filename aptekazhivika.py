@@ -4,7 +4,9 @@ import os
 import xml_writer
 import time
 import json
+from json.decoder import JSONDecodeError
 import sys
+
 
 class ZhivikaParser(Parser):
     MAIN_PAGE = 'https://www.aptekazhivika.ru/'
@@ -94,9 +96,9 @@ class ZhivikaParser(Parser):
         meds = []
         for med_index in range(count_meds):
             meds.append({'med_id':med_ids[med_index], 'price': prices[med_index], 'apteks': []})
-            if resps[med_index]:
+            try:
                 data_apteks = json.loads(resps[med_index])
-            else:
+            except JSONDecodeError:
                 continue
             for aptek in data_apteks['data']['pvzProducts']['items']:
                 aptek_id = str(aptek['entity_id'])
