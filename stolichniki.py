@@ -127,7 +127,8 @@ class Stolichniki:
                 id = aptek['url'].split('/')[-1]
                 file_name = r'stolichniki_data/stolichniki_' + id + '.xml'
                 date = time.strftime("%Y-%m-%d %H:%M:%S")
-                print(aptek)
+                if aptek['address'] is None:
+                    continue
                 xml_writer.createXML(file_name, id, aptek['address'], date)
             self.create_save_files()
         aptek_urls = [url['url'] for url in self.initial_data
