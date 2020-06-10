@@ -9,6 +9,7 @@ import sys
 class ZhivikaParser(Parser):
     MAIN_PAGE = 'https://www.aptekazhivika.ru/'
     QUERY = "query categoryProducts($pageSize: Int!, $currentPage: Int!) {\n  products: productsElastic(pageSize: $pageSize, sort: {is_in_stock:DESC,search_weight:ASC,product_qty:DESC}, currentPage: $currentPage, filter: {category_id: {eq: \"%s\"}}, applyFilter: {}) {\n    total_count\n    page_info {\n      page_size\n      current_page\n    }\n    filters {\n      request_var\n      additional_data\n      name\n      filter_items_count\n      filter_items {\n        items_count\n        value_string\n        label\n      }\n    }\n    apply_filters {\n      attribute_label\n      request_var\n      value_label\n      value_string\n    }\n    items {\n      id\n      sku\n      name\n      rec_need\n      delivery\n      delivery_status\n      thermolabile\n      termolabil_preparat\n      url_key\n      promo_label\n      orig_preparat {\n        label\n      }\n      thumbnail {\n        url\n        label\n      }\n      price {\n        oldPrice {\n            amount {\n              value\n            }\n          }\n        regularPrice {\n          amount {\n            value\n          }\n        }\n      }\n      manufacturer_id {\n        label\n      }\n      is_in_stock\n      is_isg\n      manufactures_url\n      brands_url\n      manufactures_url\n    }\n  }\n}"
+    QUERY_APTEKS = "\n query getPvzProducts($sku: String, $day: Int){\n pvzProducts(productSku: $sku, day: $day, pageSize: 1000){\n items{\n address,\n latitude,\n longitude,\n name,\n phone,\n schedule,\n quantity,\n group_name,\n schedule_prepared,\n station,\n entity_id,\n },\n total_count\n }\n }\n "
     IDS_CATEGORY = [1755, 1756, 1020, 1027, 1033, 1617, 1035, 1036, 1780]
     PAGE_SIZE = 80
 
@@ -75,10 +76,31 @@ class ZhivikaParser(Parser):
 
     def get_meds(self, data_page):
         count_meds = len(data_page['data']['products']['items'])
-        for med in range(count_meds):
-            sku = med['sku']
-            med_id = str(med['id'])
-            price = str(med['price']['regularPrice']['amount']['value'])
+        meds_json_data = data_page['data']['products']['items']
+        med_ids = []
+        prices = []
+        post_data_apteks_all_in_med = []
+        for med_index in range(count_meds):
+            sku = meds_json_data[med_index]['sku']
+            med_id = str(meds_json_data[med_index]['id'])
+            price = str(meds_json_data[med_index]['price']['regularPrice']['amount']['value'])
+            med_ids.append(med_id)
+            prices.append(price)
+            variables_apteks = {'day': 0, 'sku': sku}
+            json_post_data_apteks = {"query": self.QUERY_APTEKS, "variables": variables_apteks}
+            post_data_apteks_all_in_med.append(json_post_data_apteks)
+        urls = [self.MAIN_PAGE + 'graphql' for _ in range(len(post_data_apteks_all_in_med))]
+        resps = self.requests.post(urls, post_data_apteks_all_in_med)
+        meds = []
+        for med_index in range(count_meds):
+            data_apteks = json.loads(resps[med_index])
+            meds.append({'med_id':med_ids[med_index], 'price': prices[med_index], 'apteks': []})
+            for aptek in data_apteks['data']['pvzProducts']['items']:
+                aptek_id = str(aptek['entity_id'])
+                address = aptek['address']
+                print(address, med_ids[med_index])
+                meds[med_index]['apteks'].append({'aptek_id': aptek_id, 'address': address})
+        return meds
 
     def update_prices(self):
         print('[INFO] Обновление цен...')
