@@ -28,6 +28,11 @@ class ZdorovruParser(Parser):
 
     def get_max_page(self, url):
         resp = self.request.get(url)
+        soup = BeautifulSoup(resp.text, 'lxml')
+        last_page_pagination = soup.select_one('li.last')
+        if not last_page_pagination:
+            return 1
+        href_max_page = last_page_pagination.select_one('a')['href']
 
 
 
