@@ -1,7 +1,7 @@
 from parsing_base import Parser
 import csv_writer
 from bs4 import BeautifulSoup
-
+import re
 
 class ZdorovruParser(Parser):
     MAIN_PAGE = 'https://zdorov.ru'
