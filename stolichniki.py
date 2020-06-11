@@ -5,6 +5,7 @@ import csv_writer
 from history_writer import *
 import time
 import xml_writer
+from parsing_base import Parser
 import sys
 
 KEYS_FOR_SEARCHING = 'qwertyuiopasdfghjklzxcvbnm1234567890йцукенгшщзхъфывапролджэячсмитьбю'
@@ -54,7 +55,7 @@ def parsing_meds(resp):
     return meds
 
 
-class Stolichniki:
+class Stolichniki(Parser):
     HEADERS = {
         'Host': 'stolichki.ru',
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0',
@@ -79,6 +80,7 @@ class Stolichniki:
     }
 
     def __init__(self):
+        super().__init__()
         self.initial_data = self.get_initial_data()
         self.keys_for_searching = keys_for_seaching()
         self.csv_file = r'stolichniki_data/stolichniki_catalog.csv'
@@ -140,20 +142,17 @@ class Stolichniki:
             file_name = r'stolichniki_data/stolichniki_' + aptek_id + '.xml'
             updated_urls = [aptek_url + '?q=' + key for key in self.keys_for_searching if
                             aptek_url + '?q=' + key not in load_file(r'stolichniki_data/parsed_updated_urls')]
-            for aptek_key_url in updated_urls:
-                print(aptek_key_url)
-                resp = self.request(aptek_key_url)
-                meds = parsing_meds(resp)
+            count_urls = len(updated_urls)
+            resps = self.requests.get(updated_urls)
+            for resp_index in range(count_urls):
+                meds = parsing_meds(resps[resp_index])
                 if meds:
                     for med in meds:
                         xml_writer.add_price(file_name, med['id'], str(med['price']))
-                save_file(r'stolichniki_data/parsed_updated_urls', aptek_key_url)
+                save_file(r'stolichniki_data/parsed_updated_urls', updated_urls[resp_index])
             save_file(r'stolichniki_data/parsed_aptek_urls', aptek_url)
         print('[INFO] Цены обновлены')
 
-    def request(self, url):
-        r = requests.get(url, headers=self.HEADERS)
-        return r.text
 
 
 if __name__ == '__main__':
