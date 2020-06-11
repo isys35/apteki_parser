@@ -148,7 +148,11 @@ class Stolichniki(Parser):
                 meds = parsing_meds(resps[resp_index])
                 if meds:
                     for med in meds:
-                        xml_writer.add_price(file_name, med['id'], str(med['price']))
+                        try:
+                            # исправить!!!!! не видит аптеку 1032
+                            xml_writer.add_price(file_name, med['id'], str(med['price']))
+                        except OSError:
+                            continue
                 save_file(r'stolichniki_data/parsed_updated_urls', updated_urls[resp_index])
             save_file(r'stolichniki_data/parsed_aptek_urls', aptek_url)
         print('[INFO] Цены обновлены')
