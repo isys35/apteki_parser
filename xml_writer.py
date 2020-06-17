@@ -28,7 +28,7 @@ def add_price(filename, id, price):
     root = tree.getroot()
     item = etree.Element("ITEM")
     item.set('medid', id)
-    item.set('medprice', price)
+    item.set('medprice', str(price).replace('.',','))
     root.append(item)
     etree.indent(root, space="\t")
     handle = etree.tostring(root, encoding='utf-8')
