@@ -60,8 +60,6 @@ class AptekamosParser(Parser):
         return pages
 
 
-
-
 class Apteka:
     names = ['НЕОФАРМ',
              'ГОРЗДРАВ',
