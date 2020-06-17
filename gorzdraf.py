@@ -46,7 +46,7 @@ class GorZdrafParser(Parser):
         for aptek in apteks:
             file_name = f"{self.folder_data}/gorzdraf_{aptek['id']}.xml"
             date = time.strftime("%Y-%m-%d %H:%M:%S")
-            xml_writer.createXML(file_name, aptek['id'], aptek['address'], date)
+            xml_writer.createXML(file_name, aptek['id'], 'ГОРЗДРАВ' + aptek['address'], date)
         url_categories_with_pages = self.get_url_categories_with_pages()
         for category_with_page in url_categories_with_pages:
             meds_urls = self.get_meds_urls(category_with_page)

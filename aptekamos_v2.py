@@ -21,11 +21,11 @@ class AptekamosParser(Parser):
         for aptek_resp in apteks_resp:
             soup = BeautifulSoup(aptek_resp, 'lxml')
             header_aptek = soup.select_one('#main-header').select_one('h1').text
+            aptek_name = str()
             for name in Apteka.names:
                 if name in header_aptek:
                     aptek_name = name
                     break
-
 
 class Apteka:
     names = ['НЕОФАРМ',
