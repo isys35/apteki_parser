@@ -2,6 +2,7 @@ from parsing_base import Parser
 from bs4 import BeautifulSoup
 import sys
 
+
 class AptekamosParser(Parser):
     SIZE_ASYNC_REQUEST = 100
 
@@ -74,7 +75,7 @@ class AptekamosParser(Parser):
                 post_data = [{"orgId": int(aptek.host_id), "wuserId": 0, "searchPhrase": med.name} for med in med_list]
                 responses = self.requests.post(urls, post_data)
                 for response in responses:
-                    print(response.text)
+                    print(response)
             sys.exit()
 
 
