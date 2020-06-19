@@ -4,7 +4,6 @@ import sys
 
 class AptekamosParser(Parser):
     SIZE_ASYNC_REQUEST = 100
-    ASYNC_RANGE = 50
 
     def __init__(self):
         super().__init__()
@@ -27,6 +26,7 @@ class AptekamosParser(Parser):
         count_apteks = len(apteks_url)
         for aptek_resp_index in range(count_apteks):
             soup = BeautifulSoup(apteks_resp[aptek_resp_index], 'lxml')
+            print(apteks_url[aptek_resp_index])
             header_aptek = soup.select_one('#main-header').select_one('h1').text
             aptek_name = str()
             for name in Apteka.names:
@@ -67,7 +67,7 @@ class AptekamosParser(Parser):
         self.update_apteks()
         self.update_meds()
         for aptek in self.apteks:
-            splited_meds = self.split_list(self.meds, 50)
+            splited_meds = self.split_list(self.meds, 10)
             for med_list in splited_meds:
                 range_meds = range(len(med_list))
                 urls = [self.host + '/Services/WOrgs/getOrgPrice4?compressOutput=1' for _ in range(len(med_list))]
@@ -108,9 +108,6 @@ class Price:
         self.apteka = apteka
         self.med = med
         self.rub = rub
-
-
-
 
 if __name__ == '__main__':
     parser = AptekamosParser()
