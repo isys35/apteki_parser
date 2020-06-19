@@ -23,6 +23,7 @@ class AptekamosParser(Parser):
         return apteks_urls
 
     def update_apteks(self):
+        print('UPDATE APTEKS')
         self.apteks = []
         apteks_url = self.load_initial_data()
         apteks_resp = self.requests.get(apteks_url)
@@ -42,6 +43,7 @@ class AptekamosParser(Parser):
             self.apteks.append(Apteka(name=aptek_name, url=aptek_url, address=aptek_address, host=self.host, host_id=aptek_id))
 
     def update_meds(self):
+        print('UPDATE MEDS')
         max_page_in_catalog = self.get_max_page_in_catalog()
         page_urls = [self.host + '/tovary']
         page_urls.extend([f'https://aptekamos.ru/tovary?page={i}' for i in range(2, max_page_in_catalog + 1)])
@@ -67,6 +69,7 @@ class AptekamosParser(Parser):
         return pages
 
     def update_prices(self):
+        print('UPDATE PRICES')
         self.update_apteks()
         self.update_meds()
         self.prices = []
@@ -83,6 +86,7 @@ class AptekamosParser(Parser):
                         med = Med(name=med_data['title'], url=med_list[index_url].url)
                         med.host_id = med_data['id']
                         price = Price(med=med, apteka=aptek, rub=med_data['price'])
+                        print(price)
                         db.add_price(price)
 
     def pars_med(self, response_txt):
