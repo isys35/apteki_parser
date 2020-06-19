@@ -71,7 +71,7 @@ class AptekamosParser(Parser):
             for med_list in splited_meds:
                 range_meds = range(len(med_list))
                 urls = [self.host + '/Services/WOrgs/getOrgPrice4?compressOutput=1' for _ in range(len(med_list))]
-                post_data = [{"orgId": int(aptek.host_id), "wuserId": 0, "searchPhrase": med} for med in med_list]
+                post_data = [{"orgId": int(aptek.host_id), "wuserId": 0, "searchPhrase": med.name} for med in med_list]
                 responses = self.requests.post(urls, post_data)
                 for response in responses:
                     print(response.text)
