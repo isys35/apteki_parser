@@ -2,6 +2,7 @@ from parsing_base import Parser
 from bs4 import BeautifulSoup
 import sys
 import json
+import time
 
 class AptekamosParser(Parser):
     SIZE_ASYNC_REQUEST = 100
@@ -67,22 +68,28 @@ class AptekamosParser(Parser):
     def update_prices(self):
         self.update_apteks()
         self.update_meds()
+        self.prices = []
         for aptek in self.apteks:
-            splited_meds = self.split_list(self.meds, 10)
+            splited_meds = self.split_list(self.meds, 20)
             for med_list in splited_meds:
                 range_meds = range(len(med_list))
                 urls = [self.host + '/Services/WOrgs/getOrgPrice4?compressOutput=1' for _ in range(len(med_list))]
                 post_data = [{"orgId": int(aptek.host_id), "wuserId": 0, "searchPhrase": med.name} for med in med_list]
                 responses = self.requests.post(urls, post_data)
                 for index_url in range_meds:
-                    med = self.pars_med(responses[index_url])
-            sys.exit()
+                    meds = self.pars_med(responses[index_url])
+                    for med_data in meds:
+                        med = Med(name=med_data['title'], url=med_list[index_url].url)
+                        med.host_id = med_data['id']
+                        price = Price(med=med, apteka=aptek, rub=med_data['price'])
+                        print(price)
+                        self.prices.append(price)
 
     def pars_med(self, response_txt):
         resp_json = json.loads(response_txt)
+        data_meds = []
         for price_json in resp_json['price']:
             drug_id = str(price_json['drugId'])
-            # print(price_json['itemId'])
             if drug_id == '0':
                 drug_id = str(price_json['itemId'].split('\t')[0])
             if len(price_json['price']) == 1:
@@ -93,9 +100,9 @@ class AptekamosParser(Parser):
                     med_name = price_json['medName']
             if not med_name:
                 med_name = price_json['itemName']
-            data_meds = [{'title': med_name, 'id': drug_id}]
-            print(data_meds)
-
+            price = str(price_json['price']).replace('.', ',')
+            data_meds.append({'title': med_name, 'id': drug_id, 'price': price})
+        return data_meds
 
 class Apteka:
     names = ['НЕОФАРМ',
@@ -115,6 +122,9 @@ class Apteka:
         self.host = host
         self.upd_time = None
 
+    def refresh_upd_time(self):
+        self.upd_time = time.time()
+
 
 class Med:
     def __init__(self, name, url):
@@ -128,6 +138,11 @@ class Price:
         self.apteka = apteka
         self.med = med
         self.rub = rub
+        self.upd_time = None
+        self.refresh_upd_time()
+
+    def refresh_upd_time(self):
+        self.upd_time = time.time()
 
 if __name__ == '__main__':
     parser = AptekamosParser()
