@@ -4,6 +4,7 @@ import sys
 import json
 import time
 
+
 class AptekamosParser(Parser):
     SIZE_ASYNC_REQUEST = 100
 
@@ -143,6 +144,7 @@ class Price:
 
     def refresh_upd_time(self):
         self.upd_time = time.time()
+
 
 if __name__ == '__main__':
     parser = AptekamosParser()
