@@ -34,7 +34,7 @@ class AptekamosParser(Parser):
             aptek_url = apteks_url[aptek_resp_index]
             self.apteks.append(Apteka(name=aptek_name, url=aptek_url, address=aptek_address, host=self.host))
 
-    def get_med_names(self):
+    def get_meds(self):
         max_page_in_catalog = self.get_max_page_in_catalog()
         page_urls = [self.host + '/tovary']
         page_urls.extend([f'https://aptekamos.ru/tovary?page={i}' for i in range(2, max_page_in_catalog + 1)])
@@ -48,7 +48,7 @@ class AptekamosParser(Parser):
                 for med in meds_in_page:
                     a = med.select_one('a')
                     if a:
-                        meds.append(a['title'])
+                        meds.append(Med(a['title']))
         return meds
 
     def get_max_page_in_catalog(self):
@@ -79,6 +79,11 @@ class Apteka:
         self.upd_time = None
 
 
+class Med:
+    def __init__(self, name):
+        self.name = name
+
+
 if __name__ == '__main__':
     parser = AptekamosParser()
-    print(parser.get_med_names())
+    print(len(parser.get_meds()))
