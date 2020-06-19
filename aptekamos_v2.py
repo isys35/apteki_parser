@@ -77,6 +77,7 @@ class Apteka:
         self.host = host
         self.upd_time = None
 
+
 if __name__ == '__main__':
     parser = AptekamosParser()
     parser.get_med_names()
