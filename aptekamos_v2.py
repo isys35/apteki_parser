@@ -45,6 +45,7 @@ class AptekamosParser(Parser):
     def update_meds(self):
         print('UPDATE MEDS')
         max_page_in_catalog = self.get_max_page_in_catalog()
+        print(f"{max_page_in_catalog} максимальное кол-во страниц в каталоге")
         page_urls = [self.host + '/tovary']
         page_urls.extend([f'https://aptekamos.ru/tovary?page={i}' for i in range(2, max_page_in_catalog + 1)])
         range_urls = range(len(page_urls))
