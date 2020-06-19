@@ -85,7 +85,7 @@ class AptekamosParser(Parser):
                         med = Med(name=med_data['title'], url=med_list[index_url].url)
                         med.host_id = med_data['id']
                         price = Price(med=med, apteka=aptek, rub=med_data['price'])
-                        print(price)
+                        self.prices.append(price)
                         db.add_price(price)
 
     def pars_med(self, response_txt):
@@ -150,4 +150,8 @@ class Price:
 
 if __name__ == '__main__':
     parser = AptekamosParser()
-    parser.update_prices()
+    try:
+        parser.update_prices()
+    except Exception as ex:
+        print(ex)
+        parser.save_object(parser, 'aptekamos_parser')
