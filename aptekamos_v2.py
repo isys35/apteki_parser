@@ -48,11 +48,10 @@ class AptekamosParser(Parser):
         print(f"{max_page_in_catalog} максимальное кол-во страниц в каталоге")
         page_urls = [self.host + '/tovary']
         page_urls.extend([f'https://aptekamos.ru/tovary?page={i}' for i in range(2, max_page_in_catalog + 1)])
-        range_urls = range(len(page_urls))
-        resps = self.requests.get(page_urls)
-        for resp_index in range_urls:
-            print(page_urls[resp_index])
-            soup = BeautifulSoup(resps[resp_index], 'lxml')
+        for url in page_urls:
+            print(url)
+            response = self.request.get(url)
+            soup = BeautifulSoup(response.text, 'lxml')
             meds_in_page = soup.select('.ret-med-name')
             for med in meds_in_page:
                 a = med.select_one('a')
