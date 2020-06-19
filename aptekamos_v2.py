@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import sys
 import json
 import time
-
+import db
 
 class AptekamosParser(Parser):
     SIZE_ASYNC_REQUEST = 100
@@ -83,8 +83,7 @@ class AptekamosParser(Parser):
                         med = Med(name=med_data['title'], url=med_list[index_url].url)
                         med.host_id = med_data['id']
                         price = Price(med=med, apteka=aptek, rub=med_data['price'])
-                        print(price)
-                        self.prices.append(price)
+                        db.add_price(price)
 
     def pars_med(self, response_txt):
         resp_json = json.loads(response_txt)
