@@ -47,17 +47,16 @@ class AptekamosParser(Parser):
         max_page_in_catalog = self.get_max_page_in_catalog()
         page_urls = [self.host + '/tovary']
         page_urls.extend([f'https://aptekamos.ru/tovary?page={i}' for i in range(2, max_page_in_catalog + 1)])
-        splited_page_url = self.split_list(page_urls, self.SIZE_ASYNC_REQUEST)
-        self.meds = []
-        for url_list in splited_page_url:
-            resps = self.requests.get(url_list)
-            for resp in resps:
-                soup = BeautifulSoup(resp, 'lxml')
-                meds_in_page = soup.select('.ret-med-name')
-                for med in meds_in_page:
-                    a = med.select_one('a')
-                    if a:
-                        self.meds.append(Med(name=a['title'], url=a['href']))
+        range_urls = range(len(page_urls))
+        resps = self.requests.get(page_urls)
+        for resp_index in range_urls:
+            print(page_urls[resp_index])
+            soup = BeautifulSoup(resps[resp_index], 'lxml')
+            meds_in_page = soup.select('.ret-med-name')
+            for med in meds_in_page:
+                a = med.select_one('a')
+                if a:
+                    self.meds.append(Med(name=a['title'], url=a['href']))
 
     def get_max_page_in_catalog(self):
         url = self.host + '/tovary'
@@ -69,9 +68,9 @@ class AptekamosParser(Parser):
         return pages
 
     def update_prices(self):
-        print('UPDATE PRICES')
         self.update_apteks()
         self.update_meds()
+        print('UPDATE PRICES')
         self.prices = []
         for aptek in self.apteks:
             splited_meds = self.split_list(self.meds, 20)
