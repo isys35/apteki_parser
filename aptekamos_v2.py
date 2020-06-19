@@ -52,7 +52,7 @@ class AptekamosParser(Parser):
                 for med in meds_in_page:
                     a = med.select_one('a')
                     if a:
-                        self.meds.append(Med(a['title']))
+                        self.meds.append(Med(name=a['title'], url=a['href']))
 
     def get_max_page_in_catalog(self):
         url = self.host + '/tovary'
@@ -78,7 +78,6 @@ class AptekamosParser(Parser):
             sys.exit()
 
 
-
 class Apteka:
     names = ['НЕОФАРМ',
              'ГОРЗДРАВ',
@@ -90,7 +89,7 @@ class Apteka:
              'Живика']
 
     def __init__(self, name, url, address, host, host_id):
-        self.host_id =
+        self.host_id = host_id
         self.name = name
         self.url = url
         self.address = address
@@ -115,4 +114,4 @@ class Price:
 
 if __name__ == '__main__':
     parser = AptekamosParser()
-    print(len(parser.get_meds()))
+    parser.update_prices()
