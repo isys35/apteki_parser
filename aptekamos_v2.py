@@ -1,7 +1,7 @@
 from parsing_base import Parser
 from bs4 import BeautifulSoup
 import sys
-
+import json
 
 class AptekamosParser(Parser):
     SIZE_ASYNC_REQUEST = 100
@@ -74,9 +74,27 @@ class AptekamosParser(Parser):
                 urls = [self.host + '/Services/WOrgs/getOrgPrice4?compressOutput=1' for _ in range(len(med_list))]
                 post_data = [{"orgId": int(aptek.host_id), "wuserId": 0, "searchPhrase": med.name} for med in med_list]
                 responses = self.requests.post(urls, post_data)
-                for response in responses:
-                    print(response)
+                for index_url in range_meds:
+                    med = self.pars_med(responses[index_url])
             sys.exit()
+
+    def pars_med(self, response_txt):
+        resp_json = json.loads(response_txt)
+        for price_json in resp_json['price']:
+            drug_id = str(price_json['drugId'])
+            # print(price_json['itemId'])
+            if drug_id == '0':
+                drug_id = str(price_json['itemId'].split('\t')[0])
+            if len(price_json['price']) == 1:
+                med_name = price_json['medName']
+            else:
+                med_name = price_json['medName'] + f" № {price_json['pack']}"
+                if not price_json['pack']:
+                    med_name = price_json['medName']
+            if not med_name:
+                med_name = price_json['itemName']
+            data_meds = [{'title': med_name, 'id': drug_id}]
+            print(data_meds)
 
 
 class Apteka:
@@ -100,6 +118,7 @@ class Apteka:
 
 class Med:
     def __init__(self, name, url):
+        self.host_id = None
         self.name = name
         self.url = url
 
