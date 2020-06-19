@@ -49,6 +49,7 @@ class AptekamosParser(Parser):
                     a = med.select_one('a')
                     if a:
                         meds.append(a['title'])
+        return meds
 
     def get_max_page_in_catalog(self):
         url = self.host + '/tovary'
@@ -80,4 +81,4 @@ class Apteka:
 
 if __name__ == '__main__':
     parser = AptekamosParser()
-    parser.get_med_names()
+    print(parser.get_med_names())
