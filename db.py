@@ -54,7 +54,7 @@ def get_med_id(price):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     med_name = price.med.name
-    query = f"""SELECT id FROM med WHERE name={med_name}"""
+    query = f"""SELECT id FROM med WHERE name='{med_name}'"""
     cursor.execute(query)
     data_meds = cursor.fetchone()
     if not data_meds:
@@ -76,10 +76,10 @@ def add_price(price):
     data_price = cursor.fetchone()
     if not data_price:
         cursor.execute(f"""INSERT INTO price (rub, aptek_id, med_id, upd_time)
-                            VALUES ({price.rub}, {aptek_id}, {med_id}, {int(time.time())})""")
+                            VALUES ({str(price.rub).replace('.',',')}, {aptek_id}, {med_id}, {int(time.time())})""")
     else:
         query = f"""UPDATE price
-                    SET price={price.rub}, upd_time={int(time.time())}
+                    SET price='{str(price.rub).replace('.',',')}', upd_time={int(time.time())}
                     WHERE aptek_id={aptek_id} AND med_id={med_id}"""
         cursor.execute(query)
     conn.commit()
@@ -91,10 +91,11 @@ def add_apteka(apteka):
     """Добавляем аптеку в базу и возращаем её id """
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
+    data = [apteka.url, apteka.name, apteka.address, apteka.host, int(apteka.host_id)]
     query = f"""INSERT INTO apteka (url, name, address, host, host_id) 
-                VALUES ('{apteka.url}',{apteka.name},'{apteka.address}','{apteka.host}',{int(apteka.host_id)})"""
+                VALUES (?,?,?,?,?)"""
     print(query)
-    cursor.execute(query)
+    cursor.execute(query, data)
     conn.commit()
     query = f"""SELECT id FROM apteka WHERE url='{apteka.url}'"""
     cursor.execute(query)
@@ -109,10 +110,10 @@ def add_med(med):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     query = f"""INSERT INTO med (name) 
-                VALUES ({med.name})"""
+                VALUES ('{med.name}')"""
     cursor.execute(query)
     conn.commit()
-    query = f"""SELECT id FROM med WHERE name={med.name}"""
+    query = f"""SELECT id FROM med WHERE name='{med.name}'"""
     cursor.execute(query)
     id = cursor.fetchone()[0]
     cursor.close()
