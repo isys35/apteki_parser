@@ -1,5 +1,6 @@
 from parsing_base import Parser
 from bs4 import BeautifulSoup
+from threading import Thread
 import apteka
 import json
 import db
@@ -80,22 +81,10 @@ class AptekamosParser(Parser):
             self.update_meds()
         print('UPDATE PRICES')
         self.prices = []
-        post_url = self.host + '/Services/WOrgs/getOrgPrice4?compressOutput=1'
-        for aptek in self.apteks:
-            for med in self.meds:
-                print(aptek.name, med.name)
-                post_data = {"orgId": int(aptek.host_id), "wuserId": 0, "searchPhrase": med.name}
-                response = self.request.post(url=post_url, json_data=post_data)
-                download_meds = self.pars_med(response.text)
-                for med_data in download_meds:
-                    med = apteka.Med(name=med_data['title'],
-                                     url=med.url)
-                    price = apteka.Price(med=med,
-                                         apteka=aptek,
-                                         rub=float(med_data['price']))
-                    print(price.rub)
-                    self.prices.append(price)
-                    db.add_price(price)
+        price_updater_threads = [PriceUpdater(self, aptek) for aptek in self.apteks]
+        for thr in price_updater_threads:
+            thr.start()
+
 
     @staticmethod
     def pars_med(response_txt):
@@ -116,6 +105,34 @@ class AptekamosParser(Parser):
             price = price_json['price']
             data_meds.append({'title': med_name, 'id': drug_id, 'price': price})
         return data_meds
+
+
+class PriceUpdater(Thread):
+    def __init__(self, parser, aptek):
+        super().__init__()
+        self.parser = parser
+        self.aptek = aptek
+
+    def update_prices(self):
+        post_url = self.parser.host + '/Services/WOrgs/getOrgPrice4?compressOutput=1'
+        for med in self.parser.meds:
+            print(self.aptek.address, med.name)
+            post_data = {"orgId": int(self.aptek.host_id), "wuserId": 0, "searchPhrase": med.name}
+            response = self.parser.request.post(url=post_url, json_data=post_data)
+            download_meds = self.parser.pars_med(response.text)
+            for med_data in download_meds:
+                med = apteka.Med(name=med_data['title'],
+                                 url=med.url)
+                price = apteka.Price(med=med,
+                                     apteka=self.aptek,
+                                     rub=float(med_data['price']))
+                print(price.rub)
+                self.parser.prices.append(price)
+                db.add_price(price)
+
+    def run(self):
+        self.update_prices()
+        print('[FINISH] ' + str(self.aptek))
 
 
 if __name__ == '__main__':
