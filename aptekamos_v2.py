@@ -44,7 +44,7 @@ class AptekamosParser(Parser):
                                       url=aptek_url,
                                       address=aptek_address,
                                       host=self.host,
-                                      host_id=int(aptek_id))
+                                      host_id=int(aptek_id)))
 
     def update_meds(self):
         print('UPDATE MEDS')
