@@ -121,6 +121,7 @@ def add_med(med):
     conn.close()
     return id
 
+
 if __name__ == '__main__':
     create_db()
     create_tables()
