@@ -69,8 +69,10 @@ class AptekamosParser(Parser):
         return pages
 
     def update_prices(self):
-        self.update_apteks()
-        self.update_meds()
+        if not self.apteks:
+            self.update_apteks()
+        if not self.meds:
+            self.update_meds()
         print('UPDATE PRICES')
         self.prices = []
         for aptek in self.apteks:
@@ -154,6 +156,7 @@ class Price:
 
 if __name__ == '__main__':
     parser = AptekamosParser()
+    parser = parser.load_object('aptekamos_parser')
     try:
         parser.update_prices()
     except Exception as ex:
