@@ -1,6 +1,5 @@
 from parsing_base import Parser
 from bs4 import BeautifulSoup
-import sys
 import json
 import time
 import db
@@ -91,13 +90,14 @@ class AptekamosParser(Parser):
                     db.add_price(price)
 
     def pars_med(self, response_txt):
+        print(response_txt)
         resp_json = json.loads(response_txt)
         data_meds = []
         for price_json in resp_json['price']:
             drug_id = str(price_json['drugId'])
             if drug_id == '0':
                 drug_id = str(price_json['itemId'].split('\t')[0])
-            if len(price_json['price']) == 1:
+            if len(resp_json['price']) == 1:
                 med_name = price_json['medName']
             else:
                 med_name = price_json['medName'] + f" № {price_json['pack']}"
