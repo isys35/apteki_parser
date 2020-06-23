@@ -57,7 +57,7 @@ class AptekamosParser(Parser):
             for med in meds_in_page:
                 a = med.select_one('a')
                 if a:
-                    self.meds.append(Med(name=a['title'], url=a['href']))
+                    self.meds.append(Med(name=a['title'].replace('цена', '').strip(), url=a['href']))
 
     def get_max_page_in_catalog(self):
         url = self.host + '/tovary'
@@ -153,7 +153,6 @@ class Price:
 
 if __name__ == '__main__':
     parser = AptekamosParser()
-    parser = parser.load_object('aptekamos_parser')
     try:
         parser.update_prices()
     except Exception as ex:
