@@ -91,7 +91,6 @@ class AptekamosParser(Parser):
                 for med_data in download_meds:
                     med = apteka.Med(name=med_data['title'],
                                      url=med.url)
-                    med.host_id = med_data['id']
                     price = apteka.Price(med=med,
                                          apteka=aptek,
                                          rub=float(med_data['price']))
@@ -99,7 +98,8 @@ class AptekamosParser(Parser):
                     self.prices.append(price)
                     db.add_price(price)
 
-    def pars_med(self, response_txt):
+    @staticmethod
+    def pars_med(response_txt):
         print(response_txt)
         resp_json = json.loads(response_txt)
         data_meds = []
