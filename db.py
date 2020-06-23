@@ -26,7 +26,7 @@ def create_tables():
         name TEXT)""")
     cursor.execute("""CREATE TABLE price 
             ('id' INTEGER PRIMARY KEY AUTOINCREMENT, 
-            'rub' TEXT,
+            'rub' REAL,
             'upd_time' INTEGER,
             'med_id' INTEGER NOT NULL,
             'aptek_id' INTEGER NOT NULL,
@@ -75,13 +75,15 @@ def add_price(price):
     cursor.execute(query)
     data_price = cursor.fetchone()
     if not data_price:
+        upd_data = [price.rub, aptek_id, med_id, int(time.time())]
         cursor.execute(f"""INSERT INTO price (rub, aptek_id, med_id, upd_time)
-                            VALUES ({str(price.rub).replace('.',',')}, {aptek_id}, {med_id}, {int(time.time())})""")
+                            VALUES (?, ?, ?, ?)""", upd_data)
     else:
+        upd_data = [price.rub, int(time.time()), aptek_id, med_id]
         query = f"""UPDATE price
-                    SET price='{str(price.rub).replace('.',',')}', upd_time={int(time.time())}
-                    WHERE aptek_id={aptek_id} AND med_id={med_id}"""
-        cursor.execute(query)
+                    SET price=?, upd_time=?
+                    WHERE aptek_id=? AND med_id=?"""
+        cursor.execute(query, upd_data)
     conn.commit()
     cursor.close()
     conn.close()
