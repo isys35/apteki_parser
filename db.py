@@ -81,7 +81,7 @@ def add_price(price):
     else:
         upd_data = [price.rub, int(time.time()), aptek_id, med_id]
         query = f"""UPDATE price
-                    SET price=?, upd_time=?
+                    SET rub=?, upd_time=?
                     WHERE aptek_id=? AND med_id=?"""
         cursor.execute(query, upd_data)
     conn.commit()
