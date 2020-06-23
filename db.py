@@ -94,7 +94,6 @@ def add_apteka(apteka):
     data = [apteka.url, apteka.name, apteka.address, apteka.host, int(apteka.host_id)]
     query = f"""INSERT INTO apteka (url, name, address, host, host_id) 
                 VALUES (?,?,?,?,?)"""
-    print(query)
     cursor.execute(query, data)
     conn.commit()
     query = f"""SELECT id FROM apteka WHERE url='{apteka.url}'"""
@@ -119,3 +118,7 @@ def add_med(med):
     cursor.close()
     conn.close()
     return id
+
+if __name__ == '__main__':
+    create_db()
+    create_tables()
