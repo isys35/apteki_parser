@@ -38,7 +38,7 @@ def get_aptek_id(price):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     apteka_url = price.apteka.url
-    query = f"""SELECT id FROM apteka WHERE url={apteka_url}"""
+    query = f"""SELECT id FROM apteka WHERE url='{apteka_url}'"""
     cursor.execute(query)
     data_aptek = cursor.fetchone()
     if not data_aptek:
