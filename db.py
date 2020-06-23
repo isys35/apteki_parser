@@ -92,8 +92,7 @@ def add_apteka(apteka):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     query = f"""INSERT INTO apteka (url, name, address, host, host_id) 
-                VALUES ('{apteka.url}',{apteka.name},{apteka.address},'{apteka.host}',{int(apteka.host_id)})"""
-    print(query)
+                VALUES ('{apteka.url}',{apteka.name},'{apteka.address}','{apteka.host}',{int(apteka.host_id)})"""
     cursor.execute(query)
     conn.commit()
     query = f"""SELECT id FROM apteka WHERE url='{apteka.url}'"""
