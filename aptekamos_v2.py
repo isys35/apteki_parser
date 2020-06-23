@@ -2,7 +2,6 @@ from parsing_base import Parser
 from bs4 import BeautifulSoup
 import apteka
 import json
-import time
 import db
 
 
