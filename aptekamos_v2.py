@@ -99,7 +99,6 @@ class AptekamosParser(Parser):
                     self.prices.append(price)
                     db.add_price(price)
 
-
     def pars_med(self, response_txt):
         print(response_txt)
         resp_json = json.loads(response_txt)
