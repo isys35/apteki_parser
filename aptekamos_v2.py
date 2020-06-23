@@ -40,7 +40,11 @@ class AptekamosParser(Parser):
             aptek_address = soup.select_one('#org-addr').text
             aptek_url = apteks_url[aptek_resp_index]
             aptek_id = aptek_url.replace('/ob-apteke', '').split('-')[-1]
-            self.apteks.append(Apteka(name=aptek_name, url=aptek_url, address=aptek_address, host=self.host, host_id=aptek_id))
+            self.apteks.append(Apteka(name=aptek_name,
+                                      url=aptek_url,
+                                      address=aptek_address,
+                                      host=self.host,
+                                      host_id=int(aptek_id))
 
     def update_meds(self):
         print('UPDATE MEDS')
