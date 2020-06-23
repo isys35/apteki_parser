@@ -7,52 +7,8 @@ import time
 import xml_writer
 from parsing_base import Parser
 import sys
-
-KEYS_FOR_SEARCHING = 'qwertyuiopasdfghjklzxcvbnm1234567890йцукенгшщзхъфывапролджэячсмитьбю'
-
-
-def get_initial_data():
-    with open('stolichniki_data/initial_data.txt', 'r', encoding='cp1251') as txt:
-        rows = txt.read().split('\n')
-        apteks = []
-        for row in rows:
-            splited_row = row.split(';')
-            aptek = {'url': splited_row[0], 'address': splited_row[1]}
-            apteks.append(aptek)
-        return apteks
-
-
-def keys_for_seaching():
-    return [quote(key) for key in list(KEYS_FOR_SEARCHING)]
-
-
-def parsing_meds(resp):
-    soup = BS(resp, 'lxml')
-    table = soup.select_one('.table.products-list-in-store')
-    if not table:
-        return
-    meds_soup = table.select('tr')
-    meds = []
-    for med_soup in meds_soup:
-        if med_soup.select_one('.store-info'):
-            title = med_soup.select_one('.store-info').select_one('a').text
-            id = med_soup.select_one('.store-info').select_one('a')['href'].split('/')[-1]
-            if id not in load_file(r'stolichniki_data/parsed_med'):
-                print(title, id)
-                product_prices = med_soup.select_one('.product-price').select('.price-block')
-                product_prices_num = []
-                for product_price in product_prices:
-                    price_txt = product_price.text.replace('\n', '').replace(u'\xa0', ' ')
-                    if 'Цена по карте' in price_txt:
-                        continue
-                    if not 'Цена' in price_txt:
-                        continue
-                    price = price_txt.split(' ')[1]
-                    product_prices_num.append(float(price))
-                price_aptek_med = product_prices_num[-1]
-                meds.append({'title': title, 'id': id, 'price': price_aptek_med})
-                save_file(r'stolichniki_data/parsed_med', id)
-    return meds
+import apteka
+import db
 
 
 class Stolichniki(Parser):
@@ -81,11 +37,15 @@ class Stolichniki(Parser):
 
     def __init__(self):
         super().__init__()
-        self.initial_data = self.get_initial_data()
-        self.keys_for_searching = keys_for_seaching()
-        self.csv_file = r'stolichniki_data/stolichniki_catalog.csv'
+        self.host = 'https://stolichki.ru'
+        self.data_catalog_name = 'stolichniki_data'
+        self.apteks = []
+        self.meds = []
+        self.prices = []
+        self.keys_for_searching = [quote(key) for key in list('qwertyuiopasdfghjklzxcvbnm1234567890йцукенгшщзхъфывапролджэячсмитьбю')]
 
-    def get_initial_data(self):
+    def update_apteks(self):
+        print('UPDATE APTEKS')
         resp = requests.get('https://stolichki.ru/apteki', headers=self.HEADERS)
         soup = BS(resp.text, 'lxml')
         csrf_token = soup.find('meta', attrs={'name': "csrf-token"})['content']
@@ -93,73 +53,68 @@ class Stolichniki(Parser):
         resp = requests.get('https://stolichki.ru/stores/all?cityId=1', headers=self.HEADERS_JSON)
         json_resp = resp.json()
         stores = json_resp['stores']
-        apteks = []
+        self.apteks = []
         for store in stores:
-            apteks.append({'url': f"https://stolichki.ru/apteki/{store['id']}", 'address': store['full_address']})
-        return apteks
+            url = self.host + f"/apteki/{store['id']}"
+            host_id = store['id']
+            address = store['full_address']
+            name = 'Столички'
+            host = self.host
+            self.apteks.append(apteka.Apteka(url=url,
+                                             host_id=host_id,
+                                             address=address,
+                                             name=name,
+                                             host=host))
 
-    def create_save_files(self):
-        create_save_file(r'stolichniki_data/parsed_updated_urls')
-        create_save_file(r'stolichniki_data/parsed_aptek_urls')
-        create_save_file(r'stolichniki_data/parsed_med')
-
-    def update_catalog(self, begin=True):
-        if begin:
-            csv_writer.create_csv_file(self.csv_file)
-            self.create_save_files()
-        aptek_urls = [url['url'] for url in self.initial_data
-                        if url['url'] not in load_file(r'stolichniki_data/parsed_aptek_urls')]
-        for aptek_url in aptek_urls:
-            print(aptek_url)
-            updated_urls = [aptek_url + '?q=' + key for key in self.keys_for_searching if
-                            aptek_url + '?q=' + key not in load_file(r'stolichniki_data/parsed_updated_urls')]
-            for aptek_key_url in updated_urls:
-                print(aptek_key_url)
-                resp = self.request(aptek_key_url)
-                meds = parsing_meds(resp)
-                if meds:
-                    csv_writer.add_data_in_catalog(self.csv_file, meds)
-                save_file(r'stolichniki_data/parsed_updated_urls', aptek_key_url)
-            save_file(r'stolichniki_data/parsed_aptek_urls', aptek_url)
-        print('[INFO] Каталог обновлён')
-
-    def update_price(self, begin=True):
-        if begin:
-            for aptek in self.initial_data:
-                id = aptek['url'].split('/')[-1]
-                file_name = r'stolichniki_data/stolichniki_' + id + '.xml'
-                date = time.strftime("%Y-%m-%d %H:%M:%S")
-                if aptek['address'] is None:
-                    continue
-                xml_writer.createXML(file_name, id, aptek['address'], date)
-            self.create_save_files()
-        aptek_urls = [url['url'] for url in self.initial_data
-                      if url['url'] not in load_file(r'stolichniki_data/parsed_aptek_urls')]
-        for aptek_url in aptek_urls:
-            print(aptek_url)
-            create_save_file(r'stolichniki_data/parsed_med')
-            aptek_id = aptek_url.split('/')[-1]
-            file_name = r'stolichniki_data/stolichniki_' + aptek_id + '.xml'
-            updated_urls = [aptek_url + '?q=' + key for key in self.keys_for_searching if
-                            aptek_url + '?q=' + key not in load_file(r'stolichniki_data/parsed_updated_urls')]
-            count_urls = len(updated_urls)
-            resps = self.requests.get(updated_urls)
+    def update_prices(self):
+        print('UPDATE PRICES')
+        for aptek in self.apteks:
+            print(aptek.url)
+            urls_with_keys = [aptek.url + '?q=' + key for key in self.keys_for_searching]
+            count_urls = len(urls_with_keys)
+            resps = self.requests.get(urls_with_keys)
             for resp_index in range(count_urls):
-                meds = parsing_meds(resps[resp_index])
-                if meds:
-                    for med in meds:
-                        try:
-                            # исправить!!!!! не видит аптеку 1032
-                            xml_writer.add_price(file_name, med['id'], str(med['price']))
-                        except OSError:
-                            continue
-                save_file(r'stolichniki_data/parsed_updated_urls', updated_urls[resp_index])
-            save_file(r'stolichniki_data/parsed_aptek_urls', aptek_url)
-        print('[INFO] Цены обновлены')
+                meds = self.parsing_meds(resps[resp_index])
+                for med_data in meds:
+                    try:
+                        # исправить!!!!! не видит аптеку 1032
+                        med = apteka.Med(name=med_data['title'],
+                                         url=med_data['url'])
+                        price = apteka.Price(apteka=aptek, med=med, rub=med_data['price'])
+                        db.add_price(price)
+                        self.prices.append(price)
+                    except OSError:
+                        continue
 
+    def parsing_meds(self, resp):
+        soup = BS(resp, 'lxml')
+        table = soup.select_one('.table.products-list-in-store')
+        meds = []
+        if not table:
+            return meds
+        meds_soup = table.select('tr')
+        for med_soup in meds_soup:
+            title = med_soup.select_one('.store-info').select_one('a').text
+            id = med_soup.select_one('.store-info').select_one('a')['href'].split('/')[-1]
+            url = self.host + med_soup.select_one('.store-info').select_one('a')['href']
+            if id not in load_file(r'stolichniki_data/parsed_med'):
+                print(title, id)
+                product_prices = med_soup.select_one('.product-price').select('.price-block')
+                product_prices_num = []
+                for product_price in product_prices:
+                    price_txt = product_price.text.replace('\n', '').replace(u'\xa0', ' ')
+                    if 'Цена по карте' in price_txt:
+                        continue
+                    if not 'Цена' in price_txt:
+                        continue
+                    price = price_txt.split(' ')[1]
+                    product_prices_num.append(float(price))
+                price_aptek_med = product_prices_num[-1]
+                meds.append({'title': title, 'id': id, 'price': price_aptek_med, 'url': url})
+        return meds
 
 
 if __name__ == '__main__':
     parser = Stolichniki()
     # parser.update_catalog(begin=False)
-    parser.update_price(begin=False)
+    parser.update_prices()
