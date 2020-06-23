@@ -114,7 +114,7 @@ class AptekamosParser(Parser):
                     med_name = price_json['medName']
             if not med_name:
                 med_name = price_json['itemName']
-            price = str(price_json['price']).replace('.', ',')
+            price = price_json['price']
             data_meds.append({'title': med_name, 'id': drug_id, 'price': price})
         return data_meds
 
