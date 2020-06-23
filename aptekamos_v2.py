@@ -121,6 +121,7 @@ class AptekamosParser(Parser):
 
 if __name__ == '__main__':
     parser = AptekamosParser()
+    parser = parser.load_object('aptekamos_parser')
     try:
         parser.update_prices()
     except Exception as ex:
