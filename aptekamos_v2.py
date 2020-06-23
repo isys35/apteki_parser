@@ -84,6 +84,11 @@ class AptekamosParser(Parser):
         price_updater_threads = [PriceUpdater(self, aptek) for aptek in self.apteks]
         for thr in price_updater_threads:
             thr.start()
+        for thr in price_updater_threads:
+            if thr.is_finished:
+                print(thr.aptek.address, 'ПАРСЕР УСПЕШЕНЕН')
+            else:
+                print(thr.aptek.address, 'ШОТА НЕ ТАК')
 
 
     @staticmethod
@@ -112,6 +117,7 @@ class PriceUpdater(Thread):
         super().__init__()
         self.parser = parser
         self.aptek = aptek
+        self.is_finished = False
 
     def update_prices(self):
         post_url = self.parser.host + '/Services/WOrgs/getOrgPrice4?compressOutput=1'
@@ -133,7 +139,7 @@ class PriceUpdater(Thread):
     def run(self):
         self.update_prices()
         print('[FINISH] ' + str(self.aptek))
-
+        self.is_finished = True
 
 if __name__ == '__main__':
     parser = AptekamosParser()
