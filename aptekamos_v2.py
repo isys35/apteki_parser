@@ -34,7 +34,7 @@ class AptekamosParser(Parser):
             print(apteks_url[aptek_resp_index])
             header_aptek = soup.select_one('#main-header').select_one('h1').text
             aptek_name = str()
-            for name in Apteka.names:
+            for name in apteka.NAMES:
                 if name in header_aptek:
                     aptek_name = name
                     break
