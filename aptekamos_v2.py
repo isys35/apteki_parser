@@ -5,6 +5,7 @@ import json
 import time
 import db
 
+
 class AptekamosParser(Parser):
     SIZE_ASYNC_REQUEST = 100
 
@@ -108,6 +109,7 @@ class AptekamosParser(Parser):
             price = str(price_json['price']).replace('.', ',')
             data_meds.append({'title': med_name, 'id': drug_id, 'price': price})
         return data_meds
+
 
 class Apteka:
     names = ['НЕОФАРМ',
