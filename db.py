@@ -93,6 +93,7 @@ def add_apteka(apteka):
     cursor = conn.cursor()
     query = f"""INSERT INTO apteka (url, name, address, host, host_id) 
                 VALUES ('{apteka.url}',{apteka.name},'{apteka.address}','{apteka.host}',{int(apteka.host_id)})"""
+    print(query)
     cursor.execute(query)
     conn.commit()
     query = f"""SELECT id FROM apteka WHERE url='{apteka.url}'"""

@@ -18,13 +18,12 @@ class Apteka(NamedTuple):
     host: str
 
 
-class Med:
-    host_id: int
+class Med(NamedTuple):
     name: str
     url: str
 
 
-class Price:
+class Price(NamedTuple):
     apteka: Apteka
     med: Med
     rub: float

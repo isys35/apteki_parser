@@ -1,5 +1,6 @@
 from parsing_base import Parser
 from bs4 import BeautifulSoup
+import apteka
 import json
 import time
 import db
@@ -40,11 +41,11 @@ class AptekamosParser(Parser):
             aptek_address = soup.select_one('#org-addr').text
             aptek_url = apteks_url[aptek_resp_index]
             aptek_id = aptek_url.replace('/ob-apteke', '').split('-')[-1]
-            self.apteks.append(Apteka(name=aptek_name,
-                                      url=aptek_url,
-                                      address=aptek_address,
-                                      host=self.host,
-                                      host_id=int(aptek_id)))
+            self.apteks.append(apteka.Apteka(name=aptek_name,
+                                             url=aptek_url,
+                                             address=aptek_address,
+                                             host=self.host,
+                                             host_id=int(aptek_id)))
 
     def update_meds(self):
         print('UPDATE MEDS')
@@ -60,7 +61,9 @@ class AptekamosParser(Parser):
             for med in meds_in_page:
                 a = med.select_one('a')
                 if a:
-                    self.meds.append(Med(name=a['title'].replace('цена', '').strip(), url=a['href']))
+                    name = a['title'].replace('цена', '').strip()
+                    self.meds.append(apteka.Med(name=name,
+                                                url=a['href']))
 
     def get_max_page_in_catalog(self):
         url = self.host + '/tovary'
@@ -86,12 +89,16 @@ class AptekamosParser(Parser):
                 response = self.request.post(url=post_url, json_data=post_data)
                 download_meds = self.pars_med(response.text)
                 for med_data in download_meds:
-                    med = Med(name=med_data['title'], url=med.url)
+                    med = apteka.Med(name=med_data['title'],
+                                     url=med.url)
                     med.host_id = med_data['id']
-                    price = Price(med=med, apteka=aptek, rub=med_data['price'])
+                    price = apteka.Price(med=med,
+                                         apteka=aptek,
+                                         rub=float(med_data['price']))
                     print(price.rub)
                     self.prices.append(price)
                     db.add_price(price)
+
 
     def pars_med(self, response_txt):
         print(response_txt)
@@ -112,47 +119,6 @@ class AptekamosParser(Parser):
             price = str(price_json['price']).replace('.', ',')
             data_meds.append({'title': med_name, 'id': drug_id, 'price': price})
         return data_meds
-
-
-class Apteka:
-    names = ['НЕОФАРМ',
-             'ГОРЗДРАВ',
-             'Планета Здоровья',
-             'ВИТА Экспресс',
-             'Самсон-Фарма',
-             'Будь Здоров!',
-             'Калина Фарм',
-             'Живика']
-
-    def __init__(self, name, url, address, host, host_id):
-        self.host_id = int(host_id)
-        self.name = name
-        self.url = url
-        self.address = address
-        self.host = host
-        self.upd_time = None
-
-    def refresh_upd_time(self):
-        self.upd_time = time.time()
-
-
-class Med:
-    def __init__(self, name, url):
-        self.host_id = None
-        self.name = name
-        self.url = url
-
-
-class Price:
-    def __init__(self, med, apteka, rub):
-        self.apteka = apteka
-        self.med = med
-        self.rub = rub
-        self.upd_time = None
-        self.refresh_upd_time()
-
-    def refresh_upd_time(self):
-        self.upd_time = time.time()
 
 
 if __name__ == '__main__':
