@@ -125,7 +125,7 @@ class Apteka:
              'Живика']
 
     def __init__(self, name, url, address, host, host_id):
-        self.host_id = host_id
+        self.host_id = int(host_id)
         self.name = name
         self.url = url
         self.address = address
