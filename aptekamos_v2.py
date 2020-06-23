@@ -100,7 +100,6 @@ class AptekamosParser(Parser):
 
     @staticmethod
     def pars_med(response_txt):
-        print(response_txt)
         resp_json = json.loads(response_txt)
         data_meds = []
         for price_json in resp_json['price']:
