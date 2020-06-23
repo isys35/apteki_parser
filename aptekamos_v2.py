@@ -38,7 +38,7 @@ class AptekamosParser(Parser):
                 if name in header_aptek:
                     aptek_name = name
                     break
-            aptek_address = soup.select_one('#org-addr').text
+            aptek_address = soup.select_one('#org-addr').text.replace('\n', '').strip()
             aptek_url = apteks_url[aptek_resp_index]
             aptek_id = aptek_url.replace('/ob-apteke', '').split('-')[-1]
             self.apteks.append(apteka.Apteka(name=aptek_name,
@@ -137,7 +137,6 @@ class PriceUpdater(Thread):
 
 if __name__ == '__main__':
     parser = AptekamosParser()
-    parser = parser.load_object('aptekamos_parser')
     try:
         parser.update_prices()
     except Exception as ex:
