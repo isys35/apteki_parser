@@ -91,7 +91,7 @@ class Stolichniki(Parser):
         meds = []
         if not table:
             return meds
-        meds_soup = table.select('tr')
+        meds_soup = table.select_one('tbody').select('tr')
         for med_soup in meds_soup:
             title = med_soup.select_one('.store-info').select_one('a').text
             id = med_soup.select_one('.store-info').select_one('a')['href'].split('/')[-1]
