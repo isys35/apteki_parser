@@ -26,11 +26,3 @@ def get_data_from_catalog(file_name):
 def create_csv_file(file_name):
     with open(file_name, "w", newline="", encoding='cp1251') as file:
         csv.writer(file)
-
-
-def clear_dublicates(file_name):
-    data = get_data_from_catalog(file_name)
-
-
-if __name__ == '__main__':
-    clear_dublicates('gorzdraf_data/catalog_gorzdraf.csv')
