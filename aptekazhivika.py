@@ -106,7 +106,7 @@ class ZhivikaParser(Parser):
                                          url=f"{self.host}'/product/{med_data['med_id']}",
                                          host_id=med_data['med_id'])
                         price = apteka.Price(med=med, apteka=aptek, rub=med_data['price'])
-                        print(price.rub)
+                        print(price.rub, price.apteka.name, price.apteka.address, price.med.name)
                         db.add_price(price)
         print('[INFO] Обновление цен завершено')
 
