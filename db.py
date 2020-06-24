@@ -14,8 +14,7 @@ def create_tables():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("""CREATE TABLE apteka 
-        (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        url TEXT UNIQUE, 
+        (url TEXT PRIMARY KEY, 
         name TEXT,
         address TEXT,
         host TEXT,
@@ -31,25 +30,23 @@ def create_tables():
             'rub' REAL,
             'upd_time' INTEGER,
             'med_id' INTEGER NOT NULL,
-            'aptek_id' INTEGER NOT NULL,
+            'aptek_url' TEXT NOT NULL,
             FOREIGN KEY ('med_id') REFERENCES 'med'('id'),
-            FOREIGN KEY ('aptek_id') REFERENCES 'apteka'('id'))""")
+            FOREIGN KEY ('aptek_url') REFERENCES 'apteka'('url'))""")
 
 
-def get_aptek_id(price):
+def get_aptek_url(price):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     apteka_url = price.apteka.url
-    query = f"""SELECT id FROM apteka WHERE url='{apteka_url}'"""
+    query = f"""SELECT url FROM apteka WHERE url='{apteka_url}'"""
     cursor.execute(query)
     data_aptek = cursor.fetchone()
     if not data_aptek:
-        aptek_id = add_apteka(price.apteka)
-    else:
-        aptek_id = data_aptek[0]
+        add_apteka(price.apteka)
     cursor.close()
     conn.close()
-    return aptek_id
+    return apteka_url
 
 
 def get_med_id(price):
@@ -69,22 +66,22 @@ def get_med_id(price):
 
 
 def add_price(price):
-    aptek_id = get_aptek_id(price)
+    aptek_url = get_aptek_url(price)
     med_id = get_med_id(price)
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    query = f"""SELECT id from price WHERE aptek_id={aptek_id} AND med_id={med_id}"""
+    query = f"""SELECT id from price WHERE aptek_url={aptek_url} AND med_id={med_id}"""
     cursor.execute(query)
     data_price = cursor.fetchone()
     if not data_price:
-        upd_data = [price.rub, aptek_id, med_id, int(time.time())]
-        cursor.execute(f"""INSERT INTO price (rub, aptek_id, med_id, upd_time)
+        upd_data = [price.rub, aptek_url, med_id, int(time.time())]
+        cursor.execute(f"""INSERT INTO price (rub, aptek_url, med_id, upd_time)
                             VALUES (?, ?, ?, ?)""", upd_data)
     else:
-        upd_data = [price.rub, int(time.time()), aptek_id, med_id]
+        upd_data = [price.rub, int(time.time()), aptek_url, med_id]
         query = f"""UPDATE price
                     SET rub=?, upd_time=?
-                    WHERE aptek_id=? AND med_id=?"""
+                    WHERE aptek_url=? AND med_id=?"""
         cursor.execute(query, upd_data)
     conn.commit()
     cursor.close()
@@ -92,7 +89,7 @@ def add_price(price):
 
 
 def add_apteka(apteka):
-    """Добавляем аптеку в базу и возращаем её id """
+    """Добавляем аптеку в базу"""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     data = [apteka.url, apteka.name, apteka.address, apteka.host, int(apteka.host_id)]
@@ -100,12 +97,8 @@ def add_apteka(apteka):
                 VALUES (?,?,?,?,?)"""
     cursor.execute(query, data)
     conn.commit()
-    query = f"""SELECT id FROM apteka WHERE url='{apteka.url}'"""
-    cursor.execute(query)
-    id = cursor.fetchone()[0]
     cursor.close()
     conn.close()
-    return id
 
 
 def add_med(med):

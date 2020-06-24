@@ -90,7 +90,6 @@ class AptekamosParser(Parser):
             else:
                 print(thr.aptek.address, 'ШОТА НЕ ТАК')
 
-
     @staticmethod
     def pars_med(response_txt):
         resp_json = json.loads(response_txt)
@@ -128,7 +127,7 @@ class PriceUpdater(Thread):
             download_meds = self.parser.pars_med(response.text)
             for med_data in download_meds:
                 med = apteka.Med(name=med_data['title'],
-                                 url=med.url)
+                                 url=med.url, host_id=med_data['id'])
                 price = apteka.Price(med=med,
                                      apteka=self.aptek,
                                      rub=float(med_data['price']))
@@ -137,9 +136,14 @@ class PriceUpdater(Thread):
                 db.add_price(price)
 
     def run(self):
-        self.update_prices()
+        while not self.is_finished:
+            try:
+                self.update_prices()
+                self.is_finished = True
+            except Exception as ex:
+                print(ex)
         print('[FINISH] ' + str(self.aptek))
-        self.is_finished = True
+
 
 if __name__ == '__main__':
     parser = AptekamosParser()
