@@ -86,7 +86,7 @@ class ZhivikaParser(Parser):
                 address = aptek['address']
                 print(address, med_ids[med_index])
                 meds[med_index]['apteks'].append(apteka.Apteka(name='Живика',
-                                                                url=f"{self.host}'/store/views/{aptek_id}",
+                                                                url=f"{self.host}/store/views/{aptek_id}",
                                                                 address=address,
                                                                 host_id=aptek_id,
                                                                 host=self.host))
