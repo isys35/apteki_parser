@@ -86,6 +86,7 @@ class Stolichniki(Parser):
 
     def parsing_meds(self, resp):
         soup = BS(resp, 'lxml')
+        self.save_html(resp, 'debug.html')
         table = soup.select_one('.table.products-list-in-store')
         meds = []
         if not table:
