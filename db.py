@@ -68,7 +68,7 @@ def add_price(price):
     med_id = get_med_id(price)
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    query = f"""SELECT id from price WHERE aptek_url={aptek_url} AND med_id={med_id}"""
+    query = f"""SELECT id from price WHERE aptek_url='{aptek_url}' AND med_id={med_id}"""
     cursor.execute(query)
     data_price = cursor.fetchone()
     if not data_price:
