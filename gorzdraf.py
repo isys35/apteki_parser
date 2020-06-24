@@ -44,49 +44,34 @@ class GorZdrafParser(Parser):
         print('[INFO] Обновление цен...')
         url_categories_with_pages = self.get_url_categories_with_pages()
         for category_with_page in url_categories_with_pages:
-            meds_urls = self.get_meds_urls(category_with_page)
-            meds_with_full_info = self.get_meds_full_info(meds_urls)
-            for med in meds_with_full_info:
-                for aptek in med['apteks']:
-                    file_name = f"{self.folder_data}/gorzdraf_{aptek}.xml"
-                    xml_writer.add_price(file_name, med['med_id'], med['price'])
-                    print(file_name + ' upd')
-        print('[INFO] Обновление цен завершено')
+            meds = self.get_meds(category_with_page)
+            splited_meds = self.split_list(meds, 100)
+            for splited_med in splited_meds:
+                count_meds = len(splited_med)
+                med_urls = [med.url for med in splited_med]
+                resps = self.requests.get(med_urls)
+                aptek_urls = [f"https://gorzdrav.org/stockdb/ajax/product/{med['med_id']}/stores/all/?sortName=recommend&sortType=ASC" for med in splited_med]
+                resps_apteks = self.requests.get(aptek_urls)
+                for med_index in range(count_meds):
+                    soup = BeautifulSoup(resps[med_index], 'lxml')
+                    price = soup.find('meta', itemprop="price")
+                    price = float(price['content'])
+                    apteks = [aptek['name'] for aptek in json.loads(resps_apteks[med_index])['data']]
+                    print(json.loads(resps_apteks[med_index])['data'])
+                    print(splited_med[med_index]['url'])
 
-    def get_meds_full_info(self, meds):
-        splited_meds = self.split_list(meds, 100)
-        meds = []
-        for splited_med in splited_meds:
-            count_meds = len(splited_med)
-            med_urls = [med['url'] for med in splited_med]
-            resps = self.requests.get(med_urls)
-            aptek_urls = [f"https://gorzdrav.org/stockdb/ajax/product/{med['med_id']}/stores/all/?sortName=recommend&sortType=ASC" for med in splited_med]
-            resps_apteks = self.requests.get(aptek_urls)
-            for med_index in range(count_meds):
-                soup = BeautifulSoup(resps[med_index], 'lxml')
-                price = soup.find('meta', itemprop="price")
-                price = float(price['content'])
-                apteks = [aptek['name'] for aptek in json.loads(resps_apteks[med_index])['data']]
-                print(apteks)
-                meds.append({'med_id': splited_med[med_index]['med_id'],
-                             'url': splited_med[med_index]['url'],
-                             'price': str(price),
-                             'apteks': apteks})
-                print(splited_med[med_index]['url'])
-        return meds
-
-    def get_meds_urls(self, urls):
+    def get_meds(self, urls):
         resps = self.requests.get(urls)
-        meds_urls = []
+        meds = []
         for resp in resps:
             soup = BeautifulSoup(resp, 'lxml')
             product_blocks = soup.select('.c-prod-item.c-prod-item--grid')
             for product_block in product_blocks:
                 index = product_block.select_one('a')['data-gtm-id']
                 url = self.host + product_block.select_one('a')['href']
-                med = {'med_id': index, 'url': url}
-                meds_urls.append(med)
-        return meds_urls
+                title = product_block.select_one('a')['data-gtm-name']
+                meds.append(apteka.Med(name=title, url=url))
+        return meds
 
     def update_apteks(self):
         print('[INFO]    Получение аптек...')
@@ -112,23 +97,9 @@ class GorZdrafParser(Parser):
                                                      url= f"{self.host}/apteka/{id}"))
         print('[INFO]    Аптеки получены')
 
-
     def get_max_page(self, resp_text):
         soup = BeautifulSoup(resp_text, 'lxml')
         return int(soup.select('.b-pagination__item')[-2].text)
-
-    def get_meds(self, urls):
-        resps = self.requests.get(urls)
-        meds = []
-        for resp in resps:
-            soup = BeautifulSoup(resp, 'lxml')
-            product_blocks = soup.select('.c-prod-item.c-prod-item--grid')
-            for product_block in product_blocks:
-                index = product_block.select_one('a')['data-gtm-id']
-                title = product_block.select_one('a')['data-gtm-name']
-                med = {'id': index, 'title': title}
-                meds.append(med)
-        return meds
 
     def get_max_pages(self, urls):
         resps = self.requests.get(urls)
