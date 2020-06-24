@@ -1,12 +1,8 @@
 import requests
 from bs4 import BeautifulSoup as BS
 from urllib.parse import quote
-import csv_writer
 from history_writer import *
-import time
-import xml_writer
 from parsing_base import Parser
-import sys
 import apteka
 import db
 
@@ -68,6 +64,7 @@ class Stolichniki(Parser):
 
     def update_prices(self):
         print('UPDATE PRICES')
+        self.update_apteks()
         for aptek in self.apteks:
             print(aptek.url)
             urls_with_keys = [aptek.url + '?q=' + key for key in self.keys_for_searching]
