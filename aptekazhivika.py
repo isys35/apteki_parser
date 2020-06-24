@@ -85,11 +85,11 @@ class ZhivikaParser(Parser):
                 aptek_id = aptek['entity_id']
                 address = aptek['address']
                 print(address, med_ids[med_index])
-                meds[med_index]['apteks'].append({apteka.Apteka(name='Живика',
+                meds[med_index]['apteks'].append(apteka.Apteka(name='Живика',
                                                                 url=f"{self.host}'/store/views/{aptek_id}",
                                                                 address=address,
                                                                 host_id=aptek_id,
-                                                                host=self.host)})
+                                                                host=self.host))
         return meds
 
     def update_prices(self):
