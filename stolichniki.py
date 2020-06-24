@@ -86,13 +86,13 @@ class Stolichniki(Parser):
 
     def parsing_meds(self, resp):
         soup = BS(resp, 'lxml')
-        self.save_html(resp, 'debug.html')
         table = soup.select_one('.table.products-list-in-store')
         meds = []
         if not table:
             return meds
         meds_soup = table.select('tr')
         for med_soup in meds_soup:
+            print(med_soup)
             title = med_soup.select_one('.store-info').select_one('a').text
             id = med_soup.select_one('.store-info').select_one('a')['href'].split('/')[-1]
             url = self.host + med_soup.select_one('.store-info').select_one('a')['href']
