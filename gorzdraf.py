@@ -50,7 +50,7 @@ class GorZdrafParser(Parser):
                 count_meds = len(splited_med)
                 med_urls = [med.url for med in splited_med]
                 resps = self.requests.get(med_urls)
-                aptek_urls = [f"https://gorzdrav.org/stockdb/ajax/product/{med['med_id']}/stores/all/?sortName=recommend&sortType=ASC" for med in splited_med]
+                aptek_urls = [f"https://gorzdrav.org/stockdb/ajax/product/{med.host_id}/stores/all/?sortName=recommend&sortType=ASC" for med in splited_med]
                 resps_apteks = self.requests.get(aptek_urls)
                 for med_index in range(count_meds):
                     soup = BeautifulSoup(resps[med_index], 'lxml')
@@ -70,7 +70,7 @@ class GorZdrafParser(Parser):
                 index = product_block.select_one('a')['data-gtm-id']
                 url = self.host + product_block.select_one('a')['href']
                 title = product_block.select_one('a')['data-gtm-name']
-                meds.append(apteka.Med(name=title, url=url))
+                meds.append(apteka.Med(name=title, url=url, host_id=index))
         return meds
 
     def update_apteks(self):

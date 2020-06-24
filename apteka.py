@@ -22,6 +22,7 @@ class Apteka(NamedTuple):
 class Med(NamedTuple):
     name: str
     url: str
+    host_id: int
 
 
 class Price(NamedTuple):
