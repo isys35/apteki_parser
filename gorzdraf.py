@@ -3,22 +3,22 @@ from bs4 import BeautifulSoup
 import csv_writer
 import time
 import xml_writer
+import apteka
 import sys
 import json
 
 
 class GorZdrafParser(Parser):
-    MAIN_PAGE = 'https://gorzdrav.org'
 
     def __init__(self):
         super().__init__()
-        self.folder_data = 'gorzdraf_data'
-        self.csv_catalog = f'{self.folder_data}/catalog_gorzdraf.csv'
+        self.host = 'https://gorzdrav.org'
+        self.apteks = []
 
     def get_url_categories_with_pages(self):
-        resp = self.request.get(self.MAIN_PAGE)
+        resp = self.request.get(self.host)
         soup = BeautifulSoup(resp.text, 'lxml')
-        url_categories = [self.MAIN_PAGE + item.select_one('a')['href'] for item in
+        url_categories = [self.host + item.select_one('a')['href'] for item in
                           soup.select('.c-catalog-body__item')]
         max_pages = self.get_max_pages(url_categories)
         count_categories = len(url_categories)
@@ -42,11 +42,6 @@ class GorZdrafParser(Parser):
 
     def update_prices(self):
         print('[INFO] Обновление цен...')
-        apteks = self.get_apteks()
-        for aptek in apteks:
-            file_name = f"{self.folder_data}/gorzdraf_{aptek['id']}.xml"
-            date = time.strftime("%Y-%m-%d %H:%M:%S")
-            xml_writer.createXML(file_name, aptek['id'], 'ГОРЗДРАВ' + aptek['address'], date)
         url_categories_with_pages = self.get_url_categories_with_pages()
         for category_with_page in url_categories_with_pages:
             meds_urls = self.get_meds_urls(category_with_page)
@@ -72,6 +67,7 @@ class GorZdrafParser(Parser):
                 price = soup.find('meta', itemprop="price")
                 price = float(price['content'])
                 apteks = [aptek['name'] for aptek in json.loads(resps_apteks[med_index])['data']]
+                print(apteks)
                 meds.append({'med_id': splited_med[med_index]['med_id'],
                              'url': splited_med[med_index]['url'],
                              'price': str(price),
@@ -87,31 +83,35 @@ class GorZdrafParser(Parser):
             product_blocks = soup.select('.c-prod-item.c-prod-item--grid')
             for product_block in product_blocks:
                 index = product_block.select_one('a')['data-gtm-id']
-                url = self.MAIN_PAGE + product_block.select_one('a')['href']
+                url = self.host + product_block.select_one('a')['href']
                 med = {'med_id': index, 'url': url}
                 meds_urls.append(med)
         return meds_urls
 
-    def get_apteks(self):
+    def update_apteks(self):
         print('[INFO]    Получение аптек...')
-        resp = self.request.get(self.MAIN_PAGE + '/apteki/list/')
+        resp = self.request.get(self.host + '/apteki/list/')
         max_page = self.get_max_page(resp.text)
-        urls = [self.MAIN_PAGE + '/apteki/list/']
-        extend_list = [self.MAIN_PAGE + f'/apteki/list/?page={page}' for page in range(1, max_page)]
+        urls = [self.host + '/apteki/list/']
+        extend_list = [self.host + f'/apteki/list/?page={page}' for page in range(1, max_page)]
         urls.extend(extend_list)
         resps = self.requests.get(urls)
-        apteks = []
+        self.apteks = []
         for resp in resps:
             soup = BeautifulSoup(resp, 'lxml')
             rows_table_apteks = soup.select('.b-table__row')
             for row in rows_table_apteks:
                 if 'b-table__head' not in row['class']:
-                    id = row.select_one('.b-store-favorite__btn.js-favorites-store.js-text-hint')['data-store']
+                    id = int(row.select_one('.b-store-favorite__btn.js-favorites-store.js-text-hint')['data-store'])
                     adress = row.select_one('.c-pharm__descr').text.replace('\n', '').lstrip()
                     print(id, adress)
-                    apteks.append({'id': id, 'address': adress})
+                    self.apteks.append(apteka.Apteka(host_id=id,
+                                                     name='ГОРЗДРАВ',
+                                                     address=adress,
+                                                     host=self.host,
+                                                     url= f"{self.host}/apteka/{id}"))
         print('[INFO]    Аптеки получены')
-        return apteks
+
 
     def get_max_page(self, resp_text):
         soup = BeautifulSoup(resp_text, 'lxml')
