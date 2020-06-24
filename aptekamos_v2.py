@@ -87,11 +87,6 @@ class AptekamosParser(Parser):
         price_updater_threads = [PriceUpdater(self, aptek) for aptek in self.apteks]
         for thr in price_updater_threads:
             thr.start()
-        for thr in price_updater_threads:
-            if thr.is_finished:
-                print(thr.aptek.address, 'ПАРСЕР УСПЕШЕНЕН')
-            else:
-                print(thr.aptek.address, 'ШОТА НЕ ТАК')
 
     @staticmethod
     def pars_med(response_txt):
