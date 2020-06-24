@@ -84,6 +84,7 @@ class Stolichniki(Parser):
                         self.prices.append(price)
                     except OSError:
                         continue
+        print('UPDATE COMPLETE')
 
     def parsing_meds(self, resp):
         soup = BS(resp, 'lxml')
