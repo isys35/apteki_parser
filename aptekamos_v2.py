@@ -63,8 +63,10 @@ class AptekamosParser(Parser):
                 a = med.select_one('a')
                 if a:
                     name = a['title'].replace('цена', '').strip()
+                    id = int(a['href'].split('-')[-1].replace('/ceni', ''))
                     self.meds.append(apteka.Med(name=name,
-                                                url=a['href']))
+                                                url=a['href'],
+                                                host_id=id))
 
     def get_max_page_in_catalog(self):
         url = self.host + '/tovary'

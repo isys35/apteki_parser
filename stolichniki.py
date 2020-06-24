@@ -79,7 +79,8 @@ class Stolichniki(Parser):
                     try:
                         # исправить!!!!! не видит аптеку 1032
                         med = apteka.Med(name=med_data['title'],
-                                         url=med_data['url'])
+                                         url=med_data['url'],
+                                         host_id=med_data['id'])
                         price = apteka.Price(apteka=aptek, med=med, rub=med_data['price'])
                         db.add_price(price)
                         self.prices.append(price)
@@ -110,11 +111,10 @@ class Stolichniki(Parser):
                     price = price_txt.split(' ')[1]
                     product_prices_num.append(float(price))
                 price_aptek_med = product_prices_num[-1]
-                meds.append({'title': title, 'id': id, 'price': price_aptek_med, 'url': url})
+                meds.append({'title': title, 'id': int(id), 'price': price_aptek_med, 'url': url})
         return meds
 
 
 if __name__ == '__main__':
     parser = Stolichniki()
-    # parser.update_catalog(begin=False)
     parser.update_prices()
