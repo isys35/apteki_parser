@@ -22,9 +22,7 @@ def create_tables():
         host_id INTEGER)""")
     cursor.execute("""CREATE TABLE med 
         (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        name TEXT,
-        url TEXT,
-        host_id INTEGER)""")
+        name TEXT UNIQUE)""")
     cursor.execute("""CREATE TABLE price 
             ('id' INTEGER PRIMARY KEY AUTOINCREMENT, 
             'rub' REAL,
