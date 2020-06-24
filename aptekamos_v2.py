@@ -53,20 +53,25 @@ class AptekamosParser(Parser):
         print(f"{max_page_in_catalog} максимальное кол-во страниц в каталоге")
         page_urls = [self.host + '/tovary']
         page_urls.extend([f'https://aptekamos.ru/tovary?page={i}' for i in range(2, max_page_in_catalog + 1)])
-        respones = self.requests.get(page_urls)
-        for url in page_urls:
-            print(url)
-            response = respones[page_urls.index(url)]
-            soup = BeautifulSoup(response, 'lxml')
-            meds_in_page = soup.select('.ret-med-name')
-            for med in meds_in_page:
-                a = med.select_one('a')
-                if a:
-                    name = a['title'].replace('цена', '').strip()
-                    id = int(a['href'].split('-')[-1].replace('/ceni', ''))
-                    self.meds.append(apteka.Med(name=name,
-                                                url=a['href'],
-                                                host_id=id))
+        splited_urls = self.split_list(page_urls, 100)
+        for url_list in splited_urls:
+            responses = self.requests.get(url_list)
+            for url in url_list:
+                print(url)
+                response = responses[url_list.index(url)]
+                self.pars_page(response)
+
+    def pars_page(self, response):
+        soup = BeautifulSoup(response, 'lxml')
+        meds_in_page = soup.select('.ret-med-name')
+        for med in meds_in_page:
+            a = med.select_one('a')
+            if a:
+                name = a['title'].replace('цена', '').strip()
+                id = int(a['href'].split('-')[-1].replace('/ceni', ''))
+                self.meds.append(apteka.Med(name=name,
+                                            url=a['href'],
+                                            host_id=id))
 
     def get_max_page_in_catalog(self):
         url = self.host + '/tovary'
