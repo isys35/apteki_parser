@@ -38,6 +38,7 @@ def get_aptek_url(price):
     cursor = conn.cursor()
     apteka_url = price.apteka.url
     query = f"""SELECT url FROM apteka WHERE url='{apteka_url}'"""
+    print(query)
     cursor.execute(query)
     data_aptek = cursor.fetchone()
     if not data_aptek:
