@@ -71,6 +71,7 @@ class Stolichniki(Parser):
             count_urls = len(urls_with_keys)
             resps = self.requests.get(urls_with_keys)
             for resp_index in range(count_urls):
+                print(urls_with_keys[resp_index])
                 meds = self.parsing_meds(resps[resp_index])
                 for med_data in meds:
                     try:
@@ -92,7 +93,6 @@ class Stolichniki(Parser):
             return meds
         meds_soup = table.select('tr')
         for med_soup in meds_soup:
-            print(med_soup)
             title = med_soup.select_one('.store-info').select_one('a').text
             id = med_soup.select_one('.store-info').select_one('a')['href'].split('/')[-1]
             url = self.host + med_soup.select_one('.store-info').select_one('a')['href']
