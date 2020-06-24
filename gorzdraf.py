@@ -6,6 +6,7 @@ import xml_writer
 import apteka
 import sys
 import json
+import db
 
 
 class GorZdrafParser(Parser):
@@ -42,6 +43,7 @@ class GorZdrafParser(Parser):
 
     def update_prices(self):
         print('[INFO] Обновление цен...')
+        self.update_apteks()
         url_categories_with_pages = self.get_url_categories_with_pages()
         for category_with_page in url_categories_with_pages:
             meds = self.get_meds(category_with_page)
@@ -54,11 +56,15 @@ class GorZdrafParser(Parser):
                 resps_apteks = self.requests.get(aptek_urls)
                 for med_index in range(count_meds):
                     soup = BeautifulSoup(resps[med_index], 'lxml')
-                    price = soup.find('meta', itemprop="price")
-                    price = float(price['content'])
-                    apteks = [aptek['name'] for aptek in json.loads(resps_apteks[med_index])['data']]
-                    print(json.loads(resps_apteks[med_index])['data'])
-                    print(splited_med[med_index]['url'])
+                    price_soup = soup.find('meta', itemprop="price")
+                    rub = float(price_soup['content'])
+                    apteks_indexes = [int(aptek['name']) for aptek in json.loads(resps_apteks[med_index])['data']]
+                    for aptek_index in apteks_indexes:
+                        for aptek in self.apteks:
+                            if aptek_index == aptek.host_id:
+                                price = apteka.Price(apteka=aptek, med=splited_med[med_index], rub=rub)
+                                print(price.rub)
+                                db.add_price(price)
 
     def get_meds(self, urls):
         resps = self.requests.get(urls)
@@ -74,7 +80,7 @@ class GorZdrafParser(Parser):
         return meds
 
     def update_apteks(self):
-        print('[INFO]    Получение аптек...')
+        print('[INFO] Получение аптек...')
         resp = self.request.get(self.host + '/apteki/list/')
         max_page = self.get_max_page(resp.text)
         urls = [self.host + '/apteki/list/']
@@ -95,7 +101,7 @@ class GorZdrafParser(Parser):
                                                      address=adress,
                                                      host=self.host,
                                                      url= f"{self.host}/apteka/{id}"))
-        print('[INFO]    Аптеки получены')
+        print('[INFO] Аптеки получены')
 
     def get_max_page(self, resp_text):
         soup = BeautifulSoup(resp_text, 'lxml')
