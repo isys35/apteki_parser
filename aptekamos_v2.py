@@ -77,7 +77,7 @@ class AptekamosParser(Parser):
     def get_max_page_in_catalog(self):
         url = self.host + '/tovary'
         resp = self.requests.get([url])
-        soup = BeautifulSoup(resp[0].text, 'lxml')
+        soup = BeautifulSoup(resp[0], 'lxml')
         pager_text = soup.select_one('#d-table-pager-text').text
         meds = int(pager_text.split(' ')[-1])
         pages = (meds // 100) + 1
