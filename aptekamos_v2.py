@@ -4,7 +4,7 @@ from threading import Thread
 import apteka
 import json
 import db
-import grequests
+import sys
 
 
 class AptekamosParser(Parser):
@@ -121,41 +121,27 @@ class PriceUpdater(Thread):
         self.parser = parser
         self.aptek = aptek
         self.is_finished = False
-        self.split_range = 1
-        self.header = {'Host': 'aptekamos.ru',
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0',
-                        'Accept': 'application/json, text/javascript, */*; q=0.01',
-                        'Accept-Encoding': 'gzip, deflate, br',
-                        'Connection': 'keep-alive',
-                        'Referer': self.aptek.url,
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Content-Length': '79',
-                        'Origin': 'https://aptekamos.ru'}
 
     def update_prices(self):
         post_url = self.parser.host + '/Services/WOrgs/getOrgPrice4?compressOutput=1'
-        splited_meds = self.parser.split_list(self.parser.meds, self.split_range)
-        for med_list in splited_meds:
-            post_data = [{"orgId": int(self.aptek.host_id), "wuserId": 0, "searchPhrase": med.name} for med in med_list]
-            responses = [grequests.post(post_url, headers=self.header, json=post_data[i]) for i in range(len(med_list))]
-            responses = grequests.imap(responses)
-            for response in responses:
-                index = responses.index(response)
-                if response.status_code == 200:
-                    download_meds = self.parser.pars_med(response.text)
-                    for med_data in download_meds:
-                        med = apteka.Med(name=med_data['title'],
-                                         url=med_list[index], host_id=med_data['id'])
-                        price = apteka.Price(med=med,
-                                             apteka=self.aptek,
-                                             rub=float(med_data['price']))
-                        print(price.rub, price.apteka.name, price.apteka.address)
-                        self.parser.prices.append(price)
-                        db.add_price(price)
-                else:
-                    with open(f"{self.aptek.host_id}.txt", 'w') as f:
+        for med in self.parser.meds:
+            post_data = {"orgId": int(self.aptek.host_id), "wuserId": 0, "searchPhrase": med.name}
+            response = self.parser.request.post(post_url, json_data=post_data)
+            if response.status_code != 200:
+                with open(f"{self.aptek.host_id}.txt", 'w') as f:
                         f.write(f"{response.status_code}")
+                sys.exit()
+            download_meds = self.parser.pars_med(response.text)
+            for med_data in download_meds:
+                med = apteka.Med(name=med_data['title'],
+                                 url= med.url,
+                                 host_id=med_data['id'])
+                price = apteka.Price(med=med,
+                                     apteka=self.aptek,
+                                     rub=float(med_data['price']))
+                print(price.rub, price.apteka.name, price.apteka.address)
+                self.parser.prices.append(price)
+                db.add_price(price)
 
     def run(self):
         try:
