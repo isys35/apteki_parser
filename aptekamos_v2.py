@@ -121,7 +121,7 @@ class PriceUpdater(Thread):
         self.parser = parser
         self.aptek = aptek
         self.is_finished = False
-        self.split_range = 10
+        self.split_range = 1
         self.header = {'Host': 'aptekamos.ru',
                         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0',
                         'Accept': 'application/json, text/javascript, */*; q=0.01',
@@ -160,6 +160,7 @@ class PriceUpdater(Thread):
     def run(self):
         try:
             self.update_prices()
+            self.is_finished = True
         except Exception as ex:
             with open(f"{self.aptek.host_id}_except.txt", 'w') as f:
                 f.write(f"{ex}")
