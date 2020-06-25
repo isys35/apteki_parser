@@ -121,7 +121,7 @@ class PriceUpdater(Thread):
         self.parser = parser
         self.aptek = aptek
         self.is_finished = False
-        self.split_range = 20
+        self.split_range = 10
         self.header = {'Host': 'aptekamos.ru',
                         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0',
                         'Accept': 'application/json, text/javascript, */*; q=0.01',
