@@ -84,6 +84,7 @@ class Stolichniki(Parser):
                         self.prices.append(price)
                     except OSError:
                         continue
+            db.aptek_update_updtime(aptek)
         print('UPDATE COMPLETE')
 
     def parsing_meds(self, resp):
