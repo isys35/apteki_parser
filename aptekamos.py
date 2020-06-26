@@ -256,6 +256,7 @@ class AptekaMosAPI(AptekaMosAsync):
     def api_request(self, aptek_url, aptek_id, med):
         headers = {'Host': 'aptekamos.ru',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0',
                     'Accept': 'application/json, text/javascript, */*; q=0.01',
                     'Accept-Encoding': 'gzip, deflate, br',
                     'Connection': 'keep-alive',
