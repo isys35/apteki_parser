@@ -5,7 +5,6 @@ import apteka
 import json
 import db
 import sys
-import traceback
 
 
 class AptekamosParser(Parser):
