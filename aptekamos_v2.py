@@ -211,6 +211,7 @@ class AptekamosParser3(AptekamosParser):
                                              rub=float(med_data['price']))
                         print(price)
                         db.add_price(price)
+            db.aptek_update_updtime(aptek)
 
 
 if __name__ == '__main__':
