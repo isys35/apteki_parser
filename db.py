@@ -116,5 +116,4 @@ def add_med(med):
 
 
 if __name__ == '__main__':
-    create_db()
-    create_tables()
+    get_med_id()
