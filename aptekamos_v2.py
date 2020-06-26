@@ -141,7 +141,6 @@ class PriceUpdater(Thread):
                                      apteka=self.aptek,
                                      rub=float(med_data['price']))
                 print(price.rub, price.apteka.name, price.apteka.address)
-                self.parser.prices.append(price)
                 db.add_price(price)
 
     def run(self):
@@ -179,8 +178,39 @@ class AptekamosParser2(AptekamosParser):
                                          apteka=aptek,
                                          rub=float(med_data['price']))
                     print(price)
-                    self.prices.append(price)
                     db.add_price(price)
+
+
+class AptekamosParser3(AptekamosParser):
+    def __init__(self):
+        super().__init__()
+
+    def update_prices(self):
+        if not self.apteks:
+            self.update_apteks()
+        if not self.meds:
+            self.update_meds()
+        print('UPDATE PRICES')
+        self.prices = []
+        post_url = self.host + '/Services/WOrgs/getOrgPrice4?compressOutput=1'
+        for aptek in self.apteks:
+            splited_meds = self.split_list(self.meds, 100)
+            for med_list in splited_meds:
+                post_urls = [post_url for _ in range(len(med_list))]
+                post_data = [{"orgId": int(aptek.host_id), "wuserId": 0, "searchPhrase": med.name} for med in med_list]
+                responses = self.requests.post(post_urls, json_data=post_data)
+                for response in responses:
+                    index = responses.index(response)
+                    download_meds = self.pars_med(response)
+                    for med_data in download_meds:
+                        med = apteka.Med(name=med_data['title'],
+                                         url=med_list[index].url,
+                                         host_id=med_data['id'])
+                        price = apteka.Price(med=med,
+                                             apteka=aptek,
+                                             rub=float(med_data['price']))
+                        print(price)
+                        db.add_price(price)
 
 
 if __name__ == '__main__':
