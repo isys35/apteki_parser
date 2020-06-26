@@ -15,6 +15,7 @@ class GorZdrafParser(Parser):
         super().__init__()
         self.host = 'https://gorzdrav.org'
         self.apteks = []
+        self.name = 'горздрав'
 
     def get_url_categories_with_pages(self):
         resp = self.request.get(self.host)

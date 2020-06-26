@@ -130,5 +130,24 @@ def add_med(med):
     return id
 
 
+def get_data_meds(host=None):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    if not host:
+        query = "SELECT * FROM med"
+        cursor.execute(query)
+    else:
+        query = """SELECT m.id, m.name
+                   FROM 'price' p
+                   JOIN 'med' m ON m.id = p.med_id
+                   JOIN 'apteka' a ON a.url = p.aptek_url
+                   WHERE a.host = ?"""
+        cursor.execute(query, [host])
+    data = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return data
+
+
 if __name__ == '__main__':
-    get_med_id()
+    print(get_data_meds())
