@@ -63,7 +63,7 @@ class GorZdrafParser(Parser):
                         for aptek in self.apteks:
                             if aptek_index == aptek.host_id:
                                 price = apteka.Price(apteka=aptek, med=splited_med[med_index], rub=rub)
-                                print(price.rub)
+                                print(price)
                                 db.add_price(price)
 
     def get_meds(self, urls):
